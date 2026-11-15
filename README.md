@@ -46,7 +46,7 @@ All screenshots in both languages: [docs/screenshots](docs/screenshots/README.md
 You need Git and Docker.
 
 ```bash
-git clone https://github.com/dankozz1t/nasa-earth-jukebox.git
+git clone https://github.com/divine-rapier-dev/nasa-earth-jukebox.git
 cd nasa-earth-jukebox
 scripts/start.sh        # Windows PowerShell: .\scripts\start.ps1
 ```
