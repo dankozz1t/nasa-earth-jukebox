@@ -5,6 +5,7 @@ from fastapi import APIRouter, Path, Query
 from fastapi.responses import Response
 from starlette.concurrency import run_in_threadpool
 
+from earth_sound.adapters.inbound.http.renders import RenderGate
 from earth_sound.adapters.inbound.http.routers.soundscapes import _send
 from earth_sound.adapters.inbound.http.schemas.weather import (
     ComposeWeatherIn,
@@ -32,6 +33,7 @@ class WeatherHandlers:
     compose: ComposeWeather
     artifacts: GetWeatherArtifact
     weather: WeatherSource
+    renders: RenderGate
 
 
 def build_router(h: WeatherHandlers) -> APIRouter:
@@ -62,7 +64,7 @@ def build_router(h: WeatherHandlers) -> APIRouter:
             duration_sec=body.duration_sec,
             composer=body.composer,
         )
-        soundscape = await run_in_threadpool(h.compose, cmd)
+        soundscape = await h.renders.run(h.compose, cmd)
         return weather_out(soundscape, h.compose.ai_available)
 
     @router.get("/soundscapes/{soundscape_id}/stems/{key}.wav")

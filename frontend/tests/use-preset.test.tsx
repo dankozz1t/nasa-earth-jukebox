@@ -91,7 +91,11 @@ import {
   type PresetId,
 } from "../src/features/presets";
 import { PEEK_DWELL_MS } from "../src/features/presets/Sleeve";
-import { cancelPendingPlay, resetPresetEngine } from "../src/features/presets/engine";
+import {
+  cancelPendingPlay,
+  resetPresetEngine,
+  usePresetStatus,
+} from "../src/features/presets/engine";
 import { usePlayToggle } from "../src/features/stage";
 import {
   aerosolApi,
@@ -225,6 +229,24 @@ describe("usePreset", () => {
       soundscape: { id: "a-harmony" },
     });
     expect(result.current.progress).toEqual({});
+  });
+
+  it("stems gone from the server (404): composes once more and plays", async () => {
+    let first = true;
+    vi.mocked(aerosolApi.bytes).mockImplementation(async () => {
+      if (first) {
+        first = false;
+        throw new ApiError("Not found", 404);
+      }
+      return new ArrayBuffer(8);
+    });
+    const { result } = renderPreset();
+    await act(() => result.current.pick("nasa-four"));
+
+    expect(aerosolApi.compose).toHaveBeenCalledTimes(2);
+    expect(player.load).toHaveBeenCalledTimes(1);
+    expect(player.play).toHaveBeenCalledTimes(1);
+    expect(usePresetStatus.getState().error).toBeUndefined();
   });
 
   it("three quick picks: only the last one loads", async () => {

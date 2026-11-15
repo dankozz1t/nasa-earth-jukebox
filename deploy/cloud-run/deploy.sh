@@ -54,8 +54,11 @@ fi
 
 echo "== deploy $SERVICE to $REGION"
 # max-instances 1: the AI quotas and caches live in memory, and it caps the cost.
+# 4 GiB: 27 compose requests at once peaked at 2.7 GiB (two renders at once plus full caches).
+# concurrency 200: queued renders hold their connections while stems download beside them;
+# with 40 Cloud Run turned visitors away with 429.
 gc run deploy "$SERVICE" --image "$IMAGE" --region "$REGION" --port 8080 \
-  --cpu 1 --memory 1Gi --cpu-boost --min-instances 0 --max-instances 1 --concurrency 40 --timeout 300 \
+  --cpu 2 --memory 4Gi --cpu-boost --min-instances 0 --max-instances 1 --concurrency 200 --timeout 300 \
   --allow-unauthenticated "${SECRET_ARGS[@]}" \
   --set-env-vars "ES_AI_DAILY_LIMIT=${ES_AI_DAILY_LIMIT:-100},AI_PER_VISITOR_HOUR=${AI_PER_VISITOR_HOUR:-10}"
 

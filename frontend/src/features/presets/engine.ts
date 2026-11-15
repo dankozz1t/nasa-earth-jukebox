@@ -314,10 +314,19 @@ async function loadSingle(deps: PresetDeps, preset: Preset, run: PickRun): Promi
   const player = getPlayer();
   const { signal } = run.ctrl;
 
-  const s = await composePreset(deps.queryClient, preset, signal, run.keys);
+  let s = await composePreset(deps.queryClient, preset, signal, run.keys);
   setProgress(run, { phase: "download", pct: 0 });
 
-  const stems = await stemsCache.get(s, signal, downloadProgress(run));
+  let stems;
+  try {
+    stems = await stemsCache.get(s, signal, downloadProgress(run));
+  } catch (err) {
+    // The server keeps only its latest compositions. A cached answer whose stems are gone is composed again once.
+    if (!(err instanceof ApiError && err.status === 404) || signal.aborted) throw err;
+    for (const key of run.keys) deps.queryClient.removeQueries({ queryKey: key, exact: true });
+    s = await composePreset(deps.queryClient, preset, signal, run.keys);
+    stems = await stemsCache.get(s, signal, downloadProgress(run));
+  }
   if (signal.aborted) return false;
 
   stopTour();

@@ -86,7 +86,7 @@ ruff check . && ruff format --check .
 mypy
 ```
 
-Settings: `ES_MAX_UPLOAD_MB` (25), `ES_MAX_IMAGE_WIDTH` (1920, wider frames are scaled down), `ES_CACHE_SIZE` (8 soundscapes), `ES_SAMPLE_RATE` (22050), `ES_BINS` (128 scan steps), `ES_WEATHER_OFFLINE` (false).
+Settings: `ES_MAX_UPLOAD_MB` (25), `ES_MAX_IMAGE_WIDTH` (1920, wider frames are scaled down), `ES_CACHE_SIZE` (8 soundscapes), `ES_MAX_PARALLEL_RENDERS` (2, more requests wait in a queue), `ES_SAMPLE_RATE` (22050), `ES_BINS` (128 scan steps), `ES_WEATHER_OFFLINE` (false).
 
 ## Good to know
 

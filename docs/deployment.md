@@ -22,15 +22,16 @@ nginx takes the visitor address from `X-Forwarded-For`, so the per-visitor AI qu
 
 A hackathon demo stays inside the Cloud Run monthly free tier: 2 million requests, 180,000 vCPU-seconds and 360,000 GiB-seconds. Outbound traffic past the free allowance costs cents; a listening session downloads about 20–40 MB of audio. Google asks for a billing account, so set a budget alert (step 2 below).
 
-`deploy.sh` deploys with 1 vCPU, 1 GiB, at most one instance and no idle instance. Measured locally with these limits:
+`deploy.sh` deploys with 2 vCPU, 4 GiB, at most one instance and no idle instance. Cloud Run bills only while requests are being handled, so the free tier covers about 25 hours of active rendering a month at this size.
 
-| | Time |
-|---|---|
-| Container start | 6 s |
-| 60 s weather piece | 6 s |
-| Aerosol piece | 2 s |
+Every cached soundscape keeps its audio in memory, and a 2-minute weather piece takes about 130 MB. So the container:
+- renders at most two soundscapes at a time (`ES_MAX_PARALLEL_RENDERS`, default 2) and queues the rest;
+- keeps caches sized for 4 GiB (`ES_CACHE_SIZE=12`, `ES_WEATHER_CACHE_SIZE=8`);
+- sets `MALLOC_ARENA_MAX=2` so freed memory goes back to the system.
 
-Memory stays around 410 MiB. The first visit after a quiet period waits a few seconds for the cold start.
+The service takes up to 200 requests at once (`--concurrency 200`). Queued renders hold their connections while stems download beside them, and at 40 Cloud Run turned visitors away with 429.
+
+A load test of 27 different compose requests at once answered every request, and memory peaked at 2.7 GiB with full caches. With 1 GiB a smaller burst crashed the instance (out of memory). When the server has dropped a piece from its cache, the player composes it again by itself. The first visit after a quiet period waits a few seconds for the cold start.
 
 ## First time
 
