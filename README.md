@@ -2,13 +2,15 @@
 
 **English** · [Українська](README.uk.md)
 
-**Hear the planet NASA shows us.** Earth Jukebox turns a NASA aerosol visualization and the live weather of the whole planet into music you can explore by ear. It is built for blind and low-vision listeners first, and for anyone who understands data better by listening. Made for the NASA Space Apps Challenge 2026 challenge [The Earth Information Jukebox](https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/).
+**Hear the planet NASA shows us.** Earth Jukebox turns a NASA aerosol visualization and the live weather of the whole planet into music you can explore by ear. It is built for blind and low-vision listeners first, and for anyone who understands data better by listening. Made for the NASA Space Apps Challenge 2026 challenge [The Earth Information Jukebox](https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/) by Team DivineRapier ([project page](https://www.spaceappschallenge.org/2026/find-a-team/divinerapier/?tab=project)).
+
+**Try it now, nothing to install:** <https://earth-jukebox-693055241155.europe-west1.run.app/>. Our pitch deck: [English](docs/presentation/earth-jukebox-en.pdf) · [Українська](docs/presentation/earth-jukebox-uk.pdf).
 
 ![Earth Jukebox playing the NASA aerosol frame: a playhead crosses the map and the caption names what you hear](docs/screenshots/en/home-nasa.png)
 
 *Four aerosols* plays the NASA SVS 5669 frame from west to east. Black carbon, dust, sea salt and sulfate each get an instrument. Higher notes sit further north, louder means more of the map, and the caption says what you hear right now.
 
-🎧 **Listen first:** [Four aerosols](docs/audio/four-aerosols.mp3) · [Gentle scale](docs/audio/gentle-scale.mp3) · [Rain right now](docs/audio/rain-right-now.mp3) (MP3, about a minute each, [what you hear](docs/audio/README.md))
+🎧 **Listen now, right in the browser:** [Four aerosols](https://earth-jukebox-693055241155.europe-west1.run.app/?p=nasa-four) · [Quick tour](https://earth-jukebox-693055241155.europe-west1.run.app/?p=nasa-quick) · [Rain right now](https://earth-jukebox-693055241155.europe-west1.run.app/?p=live-rain) (each link opens the live app with that record picked; press Play)
 
 ## What you can do
 
@@ -83,7 +85,7 @@ More: [docs/ai.md](docs/ai.md).
 frontend/        React + TypeScript web app, audio player, accessibility
 backend/         C# ASP.NET Core API in front of the sound service
 sound-service/   Python service that turns images and weather into music
-docs/            documentation, screenshots, audio samples
+docs/            documentation, screenshots, pitch deck
 scripts/         start, stop, logs, dev, test
 compose.yaml     runs the three services together
 ```
@@ -102,6 +104,19 @@ How the parts fit: [docs/architecture.md](docs/architecture.md).
 | [ai.md](docs/ai.md) | The optional AI composer and AI tools used |
 | [development.md](docs/development.md) | Running, testing and troubleshooting |
 | [deployment.md](docs/deployment.md) | Publishing to Google Cloud Run |
+
+## Team
+
+We are **Team DivineRapier**, six people who built Earth Jukebox for NASA Space Apps Challenge 2026. Full bios, countries and contacts: the [Team page](https://earth-jukebox-693055241155.europe-west1.run.app/team) in the app.
+
+| Name | GitHub | Role |
+|---|---|---|
+| Aleks Teilor Danko | [@dankozz1t](https://github.com/dankozz1t) | Team lead, UI/UX and frontend engineer |
+| Sergiy Veryovka | [@Ephemerian](https://github.com/Ephemerian) | Communicator, manager, ideologist |
+| Vladyslav Zhulai | [@gonzaleshafler](https://github.com/gonzaleshafler) | Composer, artist, musician, ideologist |
+| Nazar Drahusevych | [@nazardrahusevych](https://github.com/nazardrahusevych) | Technical engineer, AI implementer |
+| Nazar Khozin | [@kranel-argonavt](https://github.com/kranel-argonavt) | Technical engineer, author of the algorithms |
+| Ihor Moroz | [@remmover](https://github.com/remmover) | Engineer, tech lead, author of the original algorithms |
 
 ## Credits
 

@@ -76,7 +76,7 @@ compose.yaml         the three services
 frontend/            React UI (src/shared -> src/features -> src/app)
 backend/             C# API (src/EarthJukebox.Api, tests/)
 sound-service/       Python: domain -> application -> adapters -> bootstrap
-docs/                this documentation, screenshots, audio samples, demo slides
+docs/                this documentation, screenshots, demo slides
 scripts/             start, stop, logs, dev, test
 deploy/             one-container image and the Google Cloud Run deploy script
 .claude/skills/      the start-app skill for coding agents
