@@ -52,6 +52,9 @@ interface SessionState {
   staged: boolean;
   muted: Record<string, boolean>; // missing keys are on
   soundscape?: AnySoundscape;
+  // The last piece of each source, so a source the person comes back to shows its map at once.
+  pieces: Partial<Record<Source, AnySoundscape>>;
+  picks: Partial<Record<Source, SessionPresetId>>; // the last record picked in each row
   booted: boolean;
   pick(id: SessionPresetId): void;
   setSource(source: Source): void;
@@ -62,6 +65,7 @@ interface SessionState {
   solo(key: string): void;
   // `muted` replaces the mix (a new preset); without it, known keys keep their state.
   show(soundscape: AnySoundscape, muted?: Record<string, boolean>): void;
+  remember(soundscape: AnySoundscape): void; // for its source's map, without putting it on stage
 }
 
 export function stemKeys(s: AnySoundscape | undefined): string[] {
@@ -69,9 +73,11 @@ export function stemKeys(s: AnySoundscape | undefined): string[] {
 }
 
 export function mixFor(preset: Preset, keys: string[]): Record<string, boolean> {
-  // A new preset starts with every layer on; only the archive drone follows `bed`.
+  // A new preset starts with every layer on, except the archive drone without `bed` and its quiet layers.
+  if (preset.source !== "nasa") return Object.fromEntries(keys.map((k) => [k, false]));
+
   return Object.fromEntries(
-    keys.map((k) => [k, preset.source === "nasa" && k === BED && !preset.bed]),
+    keys.map((k) => [k, k === BED ? !preset.bed : (preset.quiet?.includes(k) ?? false)]),
   );
 }
 
@@ -97,6 +103,8 @@ export const useSession = create<SessionState>()((set, get) => ({
   staged: false,
   muted: {},
   soundscape: undefined,
+  pieces: {},
+  picks: {},
   booted: false,
 
   pick(id) {
@@ -105,13 +113,27 @@ export const useSession = create<SessionState>()((set, get) => ({
     // A regular preset has its own wave; "custom" keeps the preview until its composition arrives.
     set({
       presetId: id,
-      ...(source ? { source } : {}),
+      ...(source ? { source, picks: { ...get().picks, [source]: id } } : {}),
       ...(id === "custom" ? {} : { preview: null }),
     });
   },
 
+  // The row comes back to the record it had: the one picked there last, else its first record.
   setSource(source) {
-    set({ source });
+    const { presetId, custom, mixes, picks } = get();
+    if (findPreset(presetId, custom)?.source === source) {
+      set({ source });
+      return;
+    }
+
+    const last = picks[source];
+    if (last === "custom" && mixes[source]) {
+      set({ source, presetId: "custom", custom: mixes[source], preview: null });
+      return;
+    }
+
+    const id = last && last !== "custom" ? last : firstPreset(source).id;
+    set({ source, presetId: id, preview: null });
   },
 
   setCustom(preset) {
@@ -120,6 +142,7 @@ export const useSession = create<SessionState>()((set, get) => ({
       presetId: "custom",
       source: preset.source,
       mixes: { ...get().mixes, [preset.source]: preset },
+      picks: { ...get().picks, [preset.source]: "custom" },
     });
   },
 
@@ -161,9 +184,18 @@ export const useSession = create<SessionState>()((set, get) => ({
     }
 
     const reached = previewReached(get().preview, soundscape);
-    set({ soundscape, muted: next, ...(reached ? { preview: null } : {}) });
+    set({
+      soundscape,
+      pieces: { ...get().pieces, [sourceOf(soundscape)]: soundscape },
+      muted: next,
+      ...(reached ? { preview: null } : {}),
+    });
 
     applyToPlayer(Object.fromEntries(keys.map((k) => [k, next[k]])));
+  },
+
+  remember(soundscape) {
+    set({ pieces: { ...get().pieces, [sourceOf(soundscape)]: soundscape } });
   },
 }));
 

@@ -41,6 +41,7 @@ import {
   type WavePreview,
 } from "./draw-weather";
 import {
+  aerosolOnPlayer,
   aerosolSpot,
   audible,
   columnX,
@@ -70,6 +71,8 @@ type MapCanvasProps = Common &
         frameImage: HTMLImageElement | null;
         classMap: Uint8Array | null;
         cursor: AerosolCursor;
+        // Puts the piece on the player in silence, so the map can sound it; true once it is there.
+        onNeedSound?(): Promise<boolean>;
       }
     | {
         kind: "live";
@@ -91,6 +94,26 @@ function canvasSize(p: MapCanvasProps): { w: number; h: number } {
   }
 
   return { w: W, h: H };
+}
+
+type Layers = ReturnType<typeof buildAerosolLayers>;
+
+// The coloured layers of each archive piece, so switching to live and back paints at once.
+const layerCache = new WeakMap<Soundscape, { key: unknown[]; layers: Layers }>();
+
+function cachedLayers(
+  img: HTMLImageElement,
+  map: Uint8Array,
+  s: Soundscape,
+  prefs: { highContrast: boolean; colorSafe: boolean },
+): Layers {
+  const key = [img, map, prefs.highContrast, prefs.colorSafe];
+  const hit = layerCache.get(s);
+  if (hit && hit.key.every((v, i) => v === key[i])) return hit.layers;
+
+  const layers = buildAerosolLayers(document, img, map, s, prefs);
+  layerCache.set(s, { key, layers });
+  return layers;
 }
 
 // Two canvases: the base is redrawn when the data, mix or colour prefs change; the overlay is drawn in
@@ -229,7 +252,7 @@ export function MapCanvas(props: MapCanvasProps) {
 
   const layers = useMemo(() => {
     if (!aerosol || !frameImage || !classMap) return null;
-    return buildAerosolLayers(document, frameImage, classMap, aerosol, { highContrast, colorSafe });
+    return cachedLayers(frameImage, classMap, aerosol, { highContrast, colorSafe });
   }, [aerosol, frameImage, classMap, highContrast, colorSafe]);
 
   useEffect(() => {
@@ -292,10 +315,23 @@ export function MapCanvas(props: MapCanvasProps) {
   function exploreAerosol(x: number, y: number, speak: boolean) {
     if (!nasa?.soundscape || !nasa.classMap) return;
 
-    const spot = aerosolSpot(nasa.soundscape, nasa.classMap, x, y);
+    const s = nasa.soundscape;
+    const spot = aerosolSpot(s, nasa.classMap, x, y);
     setReadout(spot.text);
     if (speak) getNarrator().speak(spot.text);
-    soundAerosolSpot(nasa.soundscape, x, spot.mix, nasa.muted, props.prefs.vibrate);
+
+    const { muted, onNeedSound } = nasa;
+    const { vibrate } = props.prefs;
+    if (aerosolOnPlayer(s)) {
+      soundAerosolSpot(s, x, spot.mix, muted, vibrate);
+      return;
+    }
+
+    // A fresh page, or the other source on the player: the piece is loaded in silence first. A click sounds
+    // its spot once it is there; a hover sounds at the next move.
+    void onNeedSound?.().then((ok) => {
+      if (ok && speak) soundAerosolSpot(s, x, spot.mix, muted, vibrate);
+    });
   }
 
   function probeWeather(lat: number, lon: number, speak: boolean) {

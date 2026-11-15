@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using EarthJukebox.Api.Http;
 using EarthJukebox.Api.SoundService;
 
 namespace EarthJukebox.Api.Weather;
@@ -29,16 +30,20 @@ public static partial class WeatherEndpoints
     {
         var group = app.MapGroup("/api/weather").WithTags("Weather");
 
-        group.MapGet("/sections", (SoundServiceClient s, CancellationToken ct) => Relay(s.GetAsync("v1/weather/sections", ct)))
+        group.MapGet("/sections", (SoundServiceClient s, HttpContext http, CancellationToken ct) =>
+                Relay(s.GetAsync("v1/weather/sections", ct), http, _ => CacheHeaders.StaticConfig))
             .WithSummary("List the weather map sections");
 
-        group.MapGet("/grid", (SoundServiceClient s, CancellationToken ct) => Relay(s.GetAsync("v1/weather/grid", ct)))
+        group.MapGet("/grid", (SoundServiceClient s, WeatherSchedule schedule, HttpContext http, CancellationToken ct) =>
+                Relay(s.GetAsync("v1/weather/grid", ct), http, body => schedule.ForGrid(body, DateTimeOffset.UtcNow)))
             .WithSummary("Current global weather grid");
 
-        group.MapGet("/readings", (SoundServiceClient s, CancellationToken ct) => Relay(s.GetAsync("v1/weather/readings", ct)))
+        group.MapGet("/readings", (SoundServiceClient s, WeatherSchedule schedule, HttpContext http, CancellationToken ct) =>
+                Relay(s.GetAsync("v1/weather/readings", ct), http, body => schedule.ForReadings(body, DateTimeOffset.UtcNow)))
             .WithSummary("Recent weather readings");
 
-        group.MapGet("/composer", (SoundServiceClient s, CancellationToken ct) => Relay(s.GetAsync("v1/weather/composer", ct)))
+        group.MapGet("/composer", (SoundServiceClient s, HttpContext http, CancellationToken ct) =>
+                Relay(s.GetAsync("v1/weather/composer", ct), http, _ => CacheHeaders.ServerConfig))
             .WithSummary("Check if the AI composer is configured");
 
         group.MapPost("/soundscapes", Compose)
@@ -48,12 +53,15 @@ public static partial class WeatherEndpoints
         group.MapGet("/soundscapes/{id}/{**path}", GetArtifact)
             .WithSummary("Download a stem or the mix of a weather soundscape");
 
-        group.MapGet("/basemap", async Task<IResult> (NasaBasemap basemap, CancellationToken ct) =>
+        group.MapGet("/basemap", async Task<IResult> (NasaBasemap basemap, HttpContext http, CancellationToken ct) =>
             {
                 var image = await basemap.GetAsync(ct);
-                return image is null
-                    ? TypedResults.Problem(statusCode: StatusCodes.Status502BadGateway, title: "NASA GIBS basemap is unavailable")
-                    : TypedResults.File(image, "image/jpeg");
+                if (image is null)
+                {
+                    return TypedResults.Problem(statusCode: StatusCodes.Status502BadGateway, title: "NASA GIBS basemap is unavailable");
+                }
+                CacheHeaders.SetPublic(http.Response, CacheHeaders.Image);
+                return TypedResults.File(image.Bytes, "image/jpeg", lastModified: image.LastModified, entityTag: image.ETag);
             })
             .WithSummary("NASA Blue Marble basemap image")
             .CacheOutput(p => p.Expire(TimeSpan.FromHours(6)));
@@ -134,11 +142,12 @@ public static partial class WeatherEndpoints
         return TypedResults.Stream(await upstream.Content.ReadAsStreamAsync(ct), contentType);
     }
 
-    private static async Task<IResult> Relay(Task<string> call)
+    private static async Task<IResult> Relay(Task<string> call, HttpContext http, Func<string, TimeSpan> maxAge)
     {
         try
         {
-            return TypedResults.Content(await call, "application/json");
+            var body = await call;
+            return CacheHeaders.Json(http, body, maxAge(body));
         }
         catch (SoundServiceException e)
         {

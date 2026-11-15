@@ -16,17 +16,21 @@ import type { AnySoundscape } from "./session.store";
 
 const LIVE_STALE_FALLBACK_MS = 60_000;
 const UPLOAD_STALE_MS = 5 * 60_000;
+const COMPOSE_GC_MS = 60 * 60_000;
 
 // "AI composes" starts with the rules version of the same layer, which is quick.
 export function rulesFirst(p: Preset): boolean {
   return p.source === "live" && p.settings.composer === "ai";
 }
 
+// The key holds the reading's `observedAt`, so a new reading is a new key. A snapshot (offline, rate limit)
+// stays the same reading however often the server says "next update in a minute", so its piece is kept.
 function liveStaleMs(qc: QueryClient): number {
   const grid = qc.getQueryData<WeatherGrid>(queryKeys.weather.grid);
-  const due = Date.parse(grid?.nextUpdateAt ?? "");
+  if (grid?.isSnapshot) return Infinity;
 
-  return Number.isFinite(due) ? Math.max(0, due - Date.now()) : LIVE_STALE_FALLBACK_MS;
+  const left = Date.parse(grid?.nextUpdateAt ?? "") - Date.now();
+  return left > 0 ? left : LIVE_STALE_FALLBACK_MS;
 }
 
 // `keys` collects the query keys, so a newer pick can cancel them.
@@ -46,6 +50,9 @@ async function cachedCompose<T>(
         queryKey: key,
         queryFn: ({ signal: s }) => fn(s),
         staleTime,
+        // Kept past the default five minutes with no observer: a source switched back to an hour later
+        // plays from the cache instead of composing again on the server.
+        gcTime: Math.max(staleTime, COMPOSE_GC_MS),
         retry: false,
       });
       return await abortable(p, signal);

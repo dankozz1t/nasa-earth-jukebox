@@ -14,7 +14,7 @@
 
 ## NASA GIBS
 
-- Layer `BlueMarble_ShadedRelief_Bathymetry` from the GIBS WMS (`gibs.earthdata.nasa.gov`), fetched by the backend from NASA GIBS at most daily and served with a 6 h cache. If a refresh fails, the last image stays.
+- Layer `BlueMarble_ShadedRelief_Bathymetry` from the GIBS WMS (`gibs.earthdata.nasa.gov`), fetched by the backend from NASA GIBS at most daily and kept by browsers for a day. If a refresh fails, the last image stays.
 - We acknowledge the use of imagery provided by services from NASA's Global Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS).
 
 ## Open-Meteo

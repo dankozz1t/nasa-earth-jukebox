@@ -27,6 +27,7 @@ export type Preset =
       cover: CoverId;
       settings: ComposeSettings & { frameId: "svs-5669" };
       bed: boolean;
+      quiet?: readonly string[]; // layers that start muted; the mix chips turn them back on
       file?: File;
     };
 
@@ -56,6 +57,7 @@ function nasa(
   cover: CoverId,
   bed: boolean,
   { mode = "harmony", durationSec = 64, sensitivity = 2 }: NasaTweaks = {},
+  quiet?: readonly string[],
 ): Preset {
   return {
     id,
@@ -63,6 +65,7 @@ function nasa(
     cover,
     settings: { mode, durationSec, sensitivity, frameId: "svs-5669" },
     bed,
+    ...(quiet ? { quiet } : {}),
   };
 }
 
@@ -70,7 +73,8 @@ function nasa(
 export const PRESETS: readonly Preset[] = [
   nasa("nasa-four", "four", true),
   nasa("nasa-scale", "scale", true, { mode: "scale", sensitivity: 1, durationSec: 96 }),
-  nasa("nasa-quick", "quick", true, { durationSec: 20, sensitivity: 3 }),
+  // Sea salt at sensitivity 3 is a harsh hiss in 20 seconds; it starts muted.
+  nasa("nasa-quick", "quick", true, { durationSec: 20, sensitivity: 3 }, ["sea_salt"]),
   live("live-rain", "rain", "precipitation", 3, 0.8, 60, "one"),
   live("live-heat", "heat", "temperature", 1, 1, 60, "one"),
   live("live-wind", "wind", "wind", 4, 0.7, 45, "one"),

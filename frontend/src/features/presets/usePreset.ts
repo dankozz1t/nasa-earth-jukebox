@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useToast } from "../../shared/ui";
 import { usePrefs } from "../access/prefs.store";
@@ -7,13 +7,15 @@ import {
   pickPreset,
   prefetchCompose,
   prefetchDefault,
+  stageSelection,
+  switchSource,
   usePresetStatus,
   type PresetDeps,
   type Progress,
   type TourReadiness,
 } from "./engine";
 import { DEFAULT_PRESET, presetById, type PresetId } from "./presets";
-import { useSession, type SessionPresetId } from "./session.store";
+import { useSession, type SessionPresetId, type Source } from "./session.store";
 
 interface PickOptions {
   play?: boolean; // false selects and warms the preset without sound (deep links)
@@ -49,6 +51,24 @@ export function usePreset(): UsePreset {
   }, [queryClient, show, dismiss]);
 
   return { ...actions, progress, error, errorId, tour };
+}
+
+// Loading in silence stays quiet: a failure shows on the stage with Try again, not as a toast.
+function useQuietDeps(): PresetDeps {
+  const queryClient = useQueryClient();
+  return useMemo(() => ({ queryClient, toast: () => undefined }), [queryClient]);
+}
+
+// The archive / live switch. Its own hook, apart from usePreset, so the switch works wherever it is shown.
+export function useSwitchSource(): (source: Source) => void {
+  const deps = useQuietDeps();
+  return useCallback((source: Source) => switchSource(deps, source), [deps]);
+}
+
+// For the map: puts the shown row's record on the player in silence, so a hover can sound it.
+export function useStageSelection(): () => Promise<boolean> {
+  const deps = useQuietDeps();
+  return useCallback(() => stageSelection(deps), [deps]);
 }
 
 // The load progress of one pick, for places outside the shelf (the player bar).

@@ -45,4 +45,4 @@ The aerosol composer (Sound settings, Composer) plays the live weather through t
 
 ## Exploring without playing
 
-Hovering or moving the keyboard cursor over the map plays a short probe tone for that point (pentatonic, noise for rain and wind) and shows its value, so the map can be explored by ear before pressing Play.
+Hovering or moving the keyboard cursor over the map plays a short probe tone for that point (pentatonic, noise for rain and wind) and shows its value, so the map can be explored by ear before pressing Play. Browsers allow sound only after the first click, tap or key press on the page; from then on a plain hover sounds too. The archive and live switch stops the other source's music and puts this source's selected record on the player in silence, so Play and the hover tones answer at once.

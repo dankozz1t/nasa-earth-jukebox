@@ -37,7 +37,7 @@ Two rows, one shown at a time: **Side A · NASA archive** (shown first) and **Si
 
 | Row | Presets |
 |---|---|
-| NASA archive | `nasa-four` Four aerosols (default on a first visit), `nasa-scale` Gentle scale, `nasa-quick` Quick tour |
+| NASA archive | `nasa-four` Four aerosols (default on a first visit), `nasa-scale` Gentle scale, `nasa-quick` Quick tour (starts with Sea Salt muted; its chip turns it back on) |
 | Live | `live-rain` Rain right now, `live-heat` Heat and cold, `live-wind` Wind map, `live-clouds` Clouds, `live-ai` AI composes |
 
 Raw mode, the drone switch, the aerosol composer and the four layer tour (repeat all) are in Sound settings. A remembered or shared (`?p=`) id that no longer exists falls back to the default.

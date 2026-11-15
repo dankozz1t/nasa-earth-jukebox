@@ -7,13 +7,14 @@ src/EarthJukebox.Api/
 ├── Program.cs                 DI, limits, rate limiting, problem details, OpenAPI, /api/health
 ├── Frames/                    frame catalog (Data/frames/catalog.json + PNG), GET /api/frames
 ├── Soundscapes/               compose (catalog / upload), validation, artifact proxy
-├── Weather/                   live weather relay, NASA GIBS basemap
+├── Weather/                   live weather relay, NASA GIBS basemap, cache lifetime of the grid
+├── Http/                      Cache-Control and ETag helpers
 ├── SoundService/              typed HttpClient for the Python service
 └── Data/frames/svs-5669/      NASA SVS 5669 frame and its legend
 tests/EarthJukebox.Api.Tests/  xUnit + WebApplicationFactory, sound service replaced by a stub
 ```
 
-Endpoints: [docs/api.md](../docs/api.md). OpenAPI: `/api/openapi.json`.
+Endpoints: [docs/api.md](../docs/api.md). OpenAPI: `/api/openapi.json`. Cache headers per endpoint: [docs/api.md#caching](../docs/api.md#caching).
 
 ## Safety
 

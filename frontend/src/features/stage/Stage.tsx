@@ -27,6 +27,8 @@ import {
   PRESETS,
   usePreset,
   useSession,
+  useStageSelection,
+  useSwitchSource,
   type AnySoundscape,
   type Preset,
   type SessionPresetId,
@@ -204,10 +206,19 @@ export function Stage({ flashes }: StageProps) {
   const sounding = useSession((s) => s.soundscape);
   const preview = useSession((s) => s.preview);
   const custom = useSession((s) => s.custom);
+  const pieces = useSession((s) => s.pieces);
+  const stageSelection = useStageSelection();
 
-  const onStage = pieceOnStage(sounding, source);
-  const aerosol = onStage && !isWeather(onStage) ? onStage : undefined;
-  const weather = onStage && isWeather(onStage) ? onStage : undefined;
+  // Each source keeps its last piece, so coming back to it shows its map at once, before it is on the player.
+  const nasaPiece = pieceOnStage(sounding, "nasa") ?? pieces.nasa;
+  const livePiece = pieceOnStage(sounding, "live") ?? pieces.live;
+  const aerosol = source === "nasa" && nasaPiece && !isWeather(nasaPiece) ? nasaPiece : undefined;
+  const weather = source === "live" && livePiece && isWeather(livePiece) ? livePiece : undefined;
+
+  // The archive frame, its class map and the live basemap stay loaded once seen: switching back and forth
+  // decodes nothing again.
+  const [seenLive, setSeenLive] = useState(source === "live");
+  if (source === "live" && !seenLive) setSeenLive(true);
 
   const framesQuery = useFrames();
   const frames = framesQuery.data;
@@ -222,15 +233,17 @@ export function Stage({ flashes }: StageProps) {
       <StageNotice text={error} onRetry={() => void pick(errorId)} />
     ) : null;
 
-  const frame = source === "nasa" ? archiveFrame(frames, aerosol) : undefined;
+  const nasaAerosol = nasaPiece && !isWeather(nasaPiece) ? nasaPiece : undefined;
+  const frame = archiveFrame(frames, nasaAerosol);
   // An own frame from Tune has no catalogue frame: the stage shows the image that was sent.
-  const ownFrame = aerosol && !aerosol.frame && custom?.source === "nasa" ? custom.file : undefined;
+  const ownFrame =
+    nasaAerosol && !nasaAerosol.frame && custom?.source === "nasa" ? custom.file : undefined;
   const ownFrameUrl = useObjectUrl(ownFrame);
   const { img: frameImage, status: frameStatus } = useImageStatus(
     ownFrame ? ownFrameUrl : frame?.imageUrl,
   );
-  const classMap = useClassMap(aerosol);
-  const basemap = useImage(source === "live" ? weatherApi.basemapUrl : undefined);
+  const classMap = useClassMap(nasaAerosol);
+  const basemap = useImage(seenLive ? weatherApi.basemapUrl : undefined);
 
   const [cursor, setCursor] = useState<AerosolCursor>({ step: -1, y: 0.5 });
   const [probe, setProbe] = useState<LatLon | null>(null);
@@ -286,6 +299,7 @@ export function Stage({ flashes }: StageProps) {
           frameImage={frameImage}
           classMap={classMap}
           cursor={cursor}
+          onNeedSound={stageSelection}
         >
           <Explorer
             muted={muted}
@@ -296,6 +310,7 @@ export function Stage({ flashes }: StageProps) {
             classMap={classMap}
             cursor={cursor}
             onCursor={setCursor}
+            onNeedSound={stageSelection}
           />
           {date && <span className={styles.badge}>{t("stage.staticFrame", { date })}</span>}
           {archiveStatus()}
@@ -347,10 +362,12 @@ export function Stage({ flashes }: StageProps) {
 
 export function StageSourceSwitch() {
   const source = useSession((s) => s.source);
-  const setSource = useSession((s) => s.setSource);
+  const switchSource = useSwitchSource();
   const sounding = useSession((s) => s.soundscape);
   const frames = useFrames().data;
   const frame = archiveFrame(frames, sounding && !isWeather(sounding) ? sounding : undefined);
 
-  return <SourceSwitch value={source} onChange={setSource} nasaTimestamp={frame?.timestampUtc} />;
+  return (
+    <SourceSwitch value={source} onChange={switchSource} nasaTimestamp={frame?.timestampUtc} />
+  );
 }

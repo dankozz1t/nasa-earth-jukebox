@@ -1,3 +1,4 @@
+import { getPlayer } from "../../audio/player-instance";
 import { usePlayer } from "../../audio/usePlayer";
 import { useT } from "../../shared/i18n";
 import {
@@ -38,7 +39,8 @@ function useNowPiece(): {
     id,
     preset: findPreset(id, custom),
     playing,
-    loaded: sounding !== null,
+    // A piece put on the player in silence (a source switch) has not been paused: it is ready to play.
+    loaded: sounding !== null && getPlayer().position > 0,
     busy,
   };
 }

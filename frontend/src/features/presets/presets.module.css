@@ -39,6 +39,9 @@
   position: relative;
   z-index: 1; /* in front of the record that slides out behind it */
   display: grid;
+  /* Without it the one-line instruments on touch screens widen the column, and with it the cover:
+     every sleeve came out a different size, set by the length of its subtitle. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-1);
   width: 100%;
   padding: 0;
@@ -69,8 +72,12 @@
 .slot[data-disabled="true"]::before {
   display: none;
 }
-.sleeve:hover {
-  transform: translateY(-4px);
+/* Only with a mouse: a tap leaves :hover stuck on a touch screen, and the tapped sleeve stayed lifted
+   out of line with the rest. */
+@media (hover: hover) {
+  .sleeve:hover {
+    transform: translateY(-4px);
+  }
 }
 .sleeve[aria-busy="true"]:hover {
   transform: none;
@@ -90,12 +97,15 @@
 .slot[data-custom="true"] .cover {
   border-style: dashed;
 }
+/* The paper fills the gaps of the dashed "Create your mix" frame, so the record behind does not show
+   through them. */
 .cover {
   position: relative;
   display: block;
   aspect-ratio: 1;
   border: var(--border);
   overflow: hidden;
+  background: var(--print-paper);
 }
 .title {
   font-family: var(--font-display);
@@ -304,6 +314,14 @@
 :root:global(.reduce-motion) .eq i,
 :root:global(.reduce-motion) .spin {
   animation: none;
+}
+
+/* Phones: two and a half sleeves fill the row whatever the phone's width, so the half one says the row
+   scrolls. The floor keeps three titles readable on a 320 px screen, the cap keeps them from swelling. */
+@media (max-width: 767px) {
+  .rail {
+    --sleeve: clamp(112px, calc((100% - 2 * var(--s-4)) / 2.5), 148px);
+  }
 }
 
 @media (min-width: 1024px) {

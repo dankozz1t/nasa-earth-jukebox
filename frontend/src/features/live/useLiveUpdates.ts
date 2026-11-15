@@ -2,11 +2,11 @@ import { useQueryClient, type QueryKey } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router";
 import { create } from "zustand";
-import { queryKeys, useLiveGrid, type WeatherGrid } from "../../shared/api";
+import { queryKeys, useLiveGridSync, type WeatherGrid } from "../../shared/api";
 import { t, useT } from "../../shared/i18n";
 import { formatTimeLocal } from "../../shared/lib/format";
 import { useToast } from "../../shared/ui";
-import { refreshLiveForNewReading, useSession } from "../presets";
+import { isWeather, refreshLiveForNewReading, useSession } from "../presets";
 import { useLiveSection, type Flash } from "../stage";
 import { say } from "../transport";
 import { changedPoints } from "./model/diff";
@@ -36,7 +36,9 @@ interface LiveUpdatesResult {
 // A new `observedAt` is a new reading; a refetch with the same one is not. The music follows new data on
 // every route, while the flashes, toast and announcement belong to the home screen with the live source.
 export function useLiveUpdates(): LiveUpdatesResult {
-  useLiveGrid();
+  const liveShown = useSession((s) => s.source === "live");
+  const liveOnPlayer = useSession((s) => s.soundscape !== undefined && isWeather(s.soundscape));
+  useLiveGridSync(liveShown || liveOnPlayer);
   const queryClient = useQueryClient();
   const { show } = useToast();
   const { lang } = useT();

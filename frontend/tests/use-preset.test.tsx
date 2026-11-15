@@ -13,6 +13,7 @@ const player = vi.hoisted(() => {
     playing: false,
     ready: false,
     duration: 0,
+    tag: null as unknown,
     ctx: { state: "running" as string, resume: vi.fn(async () => undefined) },
     onAdvance: null as null | ((tag: unknown) => void),
     get position() {
@@ -22,10 +23,11 @@ const player = vi.hoisted(() => {
       async (
         _stems: Record<string, ArrayBuffer>,
         duration: number,
-        _tag: unknown,
+        tag: unknown,
         opts?: { restart?: boolean; stale?: () => boolean },
       ) => {
         if (opts?.stale?.()) return false;
+        p.tag = tag;
         p.duration = duration;
         p.ready = true;
         offset = 0;
@@ -62,11 +64,13 @@ const player = vi.hoisted(() => {
       };
     },
     input: () => ({ ctx: p.ctx, node: {} }),
+    getSnapshot: () => ({ playing: p.playing, ready: p.ready, duration: p.duration, tag: p.tag }),
     reset() {
       listeners.clear();
       p.playing = false;
       p.ready = false;
       p.duration = 0;
+      p.tag = null;
       p.ctx.state = "running";
       p.onAdvance = null;
       offset = 0;
@@ -88,6 +92,7 @@ import {
   usePreset,
   usePresetUrlSync,
   useSession,
+  useSwitchSource,
   type PresetId,
 } from "../src/features/presets";
 import { PEEK_DWELL_MS } from "../src/features/presets/Sleeve";
@@ -229,6 +234,43 @@ describe("usePreset", () => {
       soundscape: { id: "a-harmony" },
     });
     expect(result.current.progress).toEqual({});
+  });
+
+  it("switching the source stops the other source's music and puts this row's record on the player in silence", async () => {
+    const { result } = renderHook(() => ({ preset: usePreset(), switchTo: useSwitchSource() }), {
+      wrapper: wrapper(),
+    });
+    await act(() => result.current.preset.pick("nasa-four"));
+    expect(player.playing).toBe(true);
+
+    fireEvent.pointerDown(document.body); // the page may make sound from now on
+    act(() => result.current.switchTo("live"));
+    await flush();
+    expect(player.pause).toHaveBeenCalledTimes(1);
+    expect(player.load).toHaveBeenLastCalledWith(
+      expect.anything(),
+      60,
+      "live-rain",
+      expect.objectContaining({ restart: true }),
+    );
+    expect(player.play).toHaveBeenCalledTimes(1); // only the first pick sounded
+    expect(useSession.getState()).toMatchObject({
+      source: "live",
+      presetId: "live-rain",
+      staged: false,
+      soundscape: { id: "w-precipitation-algorithmic" },
+    });
+
+    // Back to the archive: the record picked there comes back from the caches, nothing is composed again.
+    act(() => result.current.switchTo("nasa"));
+    await flush();
+    expect(aerosolApi.compose).toHaveBeenCalledTimes(1);
+    expect(player.getSnapshot().tag).toBe("nasa-four");
+    expect(useSession.getState()).toMatchObject({
+      source: "nasa",
+      presetId: "nasa-four",
+      soundscape: { id: "a-harmony" },
+    });
   });
 
   it("stems gone from the server (404): composes once more and plays", async () => {

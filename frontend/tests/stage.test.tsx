@@ -71,6 +71,7 @@ import { useSession } from "../src/features/presets";
 import { SourceSwitch, Stage, StageSourceSwitch } from "../src/features/stage";
 import { PlayControl, PlayDisc } from "../src/features/transport";
 import { resetExplore } from "../src/features/stage/explore";
+import { resetAudioActivation } from "../src/audio/activation";
 import {
   queryKeys,
   type Frame,
@@ -227,6 +228,7 @@ beforeEach(() => {
   player.reset();
   vi.clearAllMocks();
   resetExplore();
+  resetAudioActivation();
   // Most of the stage's behaviour is the live map's; the archive cases switch the source themselves.
   useSession.setState(
     { ...useSession.getInitialState(), presetId: "live-rain", source: "live" },
@@ -516,6 +518,25 @@ describe("Stage", () => {
     fireEvent.pointerDown(map, { clientX: 185, clientY: 90 });
     expect(probeVoice.play).toHaveBeenCalledTimes(1);
     expect(narrator.speak).toHaveBeenCalledWith(expect.stringContaining("the South Atlantic"));
+  });
+
+  it("after a click anywhere on the page, a plain hover sounds the live probe", () => {
+    renderStage();
+    const map = screen.getByRole("slider", { name: en["w.explorer"] }).parentElement!;
+    vi.spyOn(map, "getBoundingClientRect").mockReturnValue({
+      left: 0,
+      top: 0,
+      width: 360,
+      height: 180,
+      right: 360,
+      bottom: 180,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    fireEvent.pointerDown(document.body);
+    fireEvent.pointerMove(map, { clientX: 185, clientY: 90 });
+    expect(probeVoice.play).toHaveBeenCalledTimes(1);
   });
 });
 

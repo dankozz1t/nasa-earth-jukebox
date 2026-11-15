@@ -198,8 +198,11 @@
 .toolsToggle,
 .actions [aria-haspopup] {
   flex: none;
-  display: inline-grid;
-  place-items: center;
+  /* Flex, not grid: Tune and Save keep their words as a text node, and in a grid that node took a second
+     row and pushed the icon 4–5 px above the centre. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: var(--target);
   min-width: var(--target);
   height: var(--target);
@@ -220,6 +223,10 @@
 .actions [aria-haspopup] > svg {
   width: 22px;
   height: 22px;
+}
+/* A filled square reads as Stop; an outlined one looked like a checkbox next to the play disc. */
+.stop > svg {
+  fill: currentColor;
 }
 .stop:hover:not(:disabled),
 .toolsToggle:hover,

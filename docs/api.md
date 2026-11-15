@@ -19,7 +19,7 @@ All public endpoints are served by the backend under `/api` (through nginx on po
 | POST | `/api/weather/soundscapes` | Compose. Body below. Rate limited, AI capped per visitor (see [ai.md](ai.md)) |
 | GET | `/api/weather/soundscapes/{id}/stems/{part}.wav` | One instrument stem (mono) |
 | GET | `/api/weather/soundscapes/{id}/mix.wav?parts=a,b&mono=true` | Stereo mix of chosen parts (`mono=true` for mono) |
-| GET | `/api/weather/basemap` | NASA GIBS Blue Marble image (JPEG). Fetched from NASA GIBS at most daily, served with a 6 h cache |
+| GET | `/api/weather/basemap` | NASA GIBS Blue Marble image (JPEG). Fetched from NASA GIBS at most daily, browsers keep it a day (see [Caching](#caching)) |
 
 ```json
 { "section": "precipitation", "cycles": 3, "amplitude": 0.8, "durationSec": 60, "composer": "algorithmic" }
@@ -51,6 +51,23 @@ All public endpoints are served by the backend under `/api` (through nginx on po
 ```
 
 `mode` is `raw`, `scale` or `harmony`; `durationSec` 10–180; `sensitivity` 0–4.
+
+## Caching
+
+GET answers carry `Cache-Control` so browsers and any CDN in front can reuse them. Only successful answers do: errors (4xx, 5xx) and every POST go out without it, so they are never cached.
+
+| Path | `Cache-Control` | Revalidation | Why |
+|---|---|---|---|
+| `/api/frames` | `public, max-age=3600` | none | The catalog is read once at startup and changes only with a deploy |
+| `/api/frames/{id}/image` | `public, max-age=86400` | `ETag`, `Last-Modified` | Archived NASA frame, 2.7 MB |
+| `/api/weather/basemap` | `public, max-age=86400` | `ETag`, `Last-Modified` | Blue Marble is static; the backend refetches it daily and keeps the tag when the picture is the same |
+| `/api/weather/sections` | `public, max-age=86400` | weak `ETag` | Static config in the sound service |
+| `/api/weather/composer` | `public, max-age=300` | weak `ETag` | Depends only on the server's key setup |
+| `/api/weather/grid` | `public, max-age=` seconds until `nextUpdateAt`, 0–1800 | weak `ETag` | Expires when the next grid is due. A snapshot or a missing `nextUpdateAt` gets 60 s; a due time in the past (refresh running) gets 0 |
+| `/api/weather/readings` | same as the grid | weak `ETag` | Uses the `nextUpdateAt` of the last grid the backend relayed; 60 s before the first grid or for a snapshot reading |
+| `/api/soundscapes/{id}/...`, `/api/weather/soundscapes/{id}/...` | `public, max-age=86400, immutable`, set by the sound service | none | The id hashes the inputs, so the bytes never change |
+
+A request with a matching `If-None-Match` (or `If-Modified-Since` for the files) gets `304 Not Modified` without a body. nginx gzips JSON, JS, CSS and SVG (also behind a proxy or CDN), never WAV, PNG or JPEG. It serves `/assets/` (hashed file names) with `public, max-age=31536000, immutable` and `index.html` with `no-cache`.
 
 ## Limits
 
