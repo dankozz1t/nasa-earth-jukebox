@@ -45,8 +45,11 @@ COPY --from=frontend /src/dist /app/www
 COPY deploy/container/nginx.conf /app/nginx.conf
 COPY --chmod=755 deploy/container/start.sh /app/start.sh
 
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
-    ES_HOST=127.0.0.1 ES_PORT=8000 \
+# MALLOC_ARENA_MAX: NumPy renders run in threads; fewer malloc arenas give freed memory back.
+# Caches sized for 4 GiB: every cached soundscape keeps its stems in memory (a 2-minute weather piece
+# is ~130 MB). 27 different requests at once peaked at 2.7 GiB with full caches.
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 MALLOC_ARENA_MAX=2 \
+    ES_HOST=127.0.0.1 ES_PORT=8000 ES_CACHE_SIZE=12 ES_WEATHER_CACHE_SIZE=8 \
     ASPNETCORE_URLS=http://127.0.0.1:5080 ASPNETCORE_ENVIRONMENT=Production DOTNET_gcServer=0 \
     SoundService__BaseUrl=http://127.0.0.1:8000/
 # run as a non-root user

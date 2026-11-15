@@ -3,8 +3,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, File, Form, Path, Query, UploadFile
 from fastapi.responses import Response
-from starlette.concurrency import run_in_threadpool
 
+from earth_sound.adapters.inbound.http.renders import RenderGate
 from earth_sound.adapters.inbound.http.schemas.soundscapes import SoundscapeOut, to_schema
 from earth_sound.application.compose_soundscape.use_case import ComposeSoundscape
 from earth_sound.application.get_artifact.use_case import Artifact, GetArtifact
@@ -21,6 +21,7 @@ class SoundscapeHandlers:
     compose: ComposeSoundscape
     artifacts: GetArtifact
     max_upload_bytes: int
+    renders: RenderGate
 
 
 async def _read_limited(upload: UploadFile, limit: int, name: str) -> bytes:
@@ -65,7 +66,7 @@ def build_router(handlers: SoundscapeHandlers) -> APIRouter:
             source_label=source_label,
         )
         # CPU-bound: run off the event loop
-        soundscape = await run_in_threadpool(handlers.compose, command)
+        soundscape = await handlers.renders.run(handlers.compose, command)
         return to_schema(soundscape)
 
     @router.get("/{soundscape_id}/stems/{key}.wav")

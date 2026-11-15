@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from earth_sound.adapters.inbound.http.app_factory import create_app
+from earth_sound.adapters.inbound.http.renders import RenderGate
 from earth_sound.adapters.inbound.http.routers.soundscapes import SoundscapeHandlers
 from earth_sound.adapters.inbound.http.routers.weather import WeatherHandlers
 from earth_sound.adapters.outbound.ai.factory import build_ai_composer
@@ -45,16 +46,19 @@ def build_app(
     weather_source = weather
     ai = composer or build_ai_composer(settings.ai_config())
     weather_store: MemoryStore[WeatherSoundscape] = MemoryStore(settings.weather_cache_size)
+    renders = RenderGate(settings.max_parallel_renders)  # shared by both kinds of soundscape
     weather_handlers = WeatherHandlers(
         compose=ComposeWeather(weather_source, ai, weather_store, settings.sample_rate),
         artifacts=GetWeatherArtifact(weather_store, WavEncoder()),
         weather=weather_source,
+        renders=renders,
     )
     return create_app(
         SoundscapeHandlers(
             compose=compose,
             artifacts=artifacts,
             max_upload_bytes=settings.max_upload_mb * 1024 * 1024,
+            renders=renders,
         ),
         weather_handlers,
     )

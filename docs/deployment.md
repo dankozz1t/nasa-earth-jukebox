@@ -22,15 +22,16 @@ nginx takes the visitor address from `X-Forwarded-For`, so the per-visitor AI qu
 
 A hackathon demo stays inside the Cloud Run monthly free tier: 2 million requests, 180,000 vCPU-seconds and 360,000 GiB-seconds. Outbound traffic past the free allowance costs cents; a listening session downloads about 20–40 MB of audio. Google asks for a billing account, so set a budget alert (step 2 below).
 
-`deploy.sh` deploys with 1 vCPU, 1 GiB, at most one instance and no idle instance. Measured locally with these limits:
+`deploy.sh` deploys with 2 vCPU, 4 GiB, at most one instance and no idle instance. Cloud Run bills only while requests are being handled, so the free tier covers about 25 hours of active rendering a month at this size.
 
-| | Time |
-|---|---|
-| Container start | 6 s |
-| 60 s weather piece | 6 s |
-| Aerosol piece | 2 s |
+Every cached soundscape keeps its audio in memory, and a 2-minute weather piece takes about 130 MB. So the container:
+- renders at most two soundscapes at a time (`ES_MAX_PARALLEL_RENDERS`, default 2) and queues the rest;
+- keeps caches sized for 4 GiB (`ES_CACHE_SIZE=12`, `ES_WEATHER_CACHE_SIZE=8`);
+- sets `MALLOC_ARENA_MAX=2` so freed memory goes back to the system.
 
-Memory stays around 410 MiB. The first visit after a quiet period waits a few seconds for the cold start.
+The service takes up to 200 requests at once (`--concurrency 200`). Queued renders hold their connections while stems download beside them, and at 40 Cloud Run turned visitors away with 429.
+
+A load test of 27 different compose requests at once answered every request, and memory peaked at 2.7 GiB with full caches. With 1 GiB a smaller burst crashed the instance (out of memory). When the server has dropped a piece from its cache, the player composes it again by itself. The first visit after a quiet period waits a few seconds for the cold start.
 
 ## First time
 
@@ -59,7 +60,8 @@ The script:
 - turns on the APIs it needs;
 - creates an image repository in Artifact Registry;
 - builds the image with Cloud Build (5–10 min the first time);
-- deploys the `earth-jukebox` service in `europe-west1`.
+- deploys the `earth-jukebox` service in `europe-west1`;
+- creates a Cloud Scheduler job, `earth-jukebox-warmup`, that opens `/api/health` every 10 minutes. Cloud Run stops an idle instance after about 15 minutes, so the ping keeps it warm and visitors skip the cold start. Billing is per request, so the pings cost next to nothing, and Cloud Scheduler gives 3 jobs per billing account for free. Pause or delete the job in **Cloud Scheduler** in the console.
 
 It prints the public URL, `https://earth-jukebox-….run.app`. Run the same command again to deploy a new version. It deploys the working tree, uncommitted changes included, and tags the image `-dirty` when there are any. Another region goes second: `deploy/cloud-run/deploy.sh <project-id> us-central1`.
 
@@ -70,6 +72,24 @@ Logs: **Cloud Run → earth-jukebox → Logs** in the console, or:
 ```bash
 gcloud run services logs read earth-jukebox --region europe-west1 --project <project-id>
 ```
+
+## CI/CD (GitHub Actions)
+
+[.github/workflows/ci-cd.yml](../.github/workflows/ci-cd.yml) does two things:
+- **On every pull request:** runs the tests and linters of all three services. The jobs are `frontend` (ESLint, Prettier, Vitest, build), `sound-service` (ruff, pytest) and `backend` (`dotnet test`).
+- **On a push to `main` (a merged PR):** when all three jobs pass, the `deploy` job runs `deploy/cloud-run/deploy.sh` with `DEPLOY_CI=1`, then checks `/api/health`.
+
+A manual run from the **Actions** tab (`workflow_dispatch`) on `main` deploys too.
+
+The deploy job signs in to Google Cloud without a stored key, through Workload Identity Federation. A project owner sets this up once:
+
+```bash
+deploy/cloud-run/setup-github.sh <project-id> [owner/repo]
+```
+
+The script creates the pool and provider `github`, and the service account `github-deployer` with only the roles a deploy needs. Only workflows of that repository can sign in as it. It prints the provider and the account email that go into `ci-cd.yml`; neither is a secret. In CI, `deploy.sh` skips the one-time setup (APIs, IAM, image repository, Scheduler job), which needs an owner.
+
+To stop deploying from CI, delete the service account `github-deployer`, or disable the workflow in the Actions tab.
 
 ## Run the container locally
 
@@ -84,4 +104,4 @@ Open <http://localhost:8090>. Add `--env-file .env` to try it with your AI key.
 
 - Keys live only in Secret Manager, never in the repository or the image.
 - After a start the live weather loads in the background. The bundled snapshot plays for the first minutes, and the UI says so.
-- Open the app a minute before a demo so it is awake.
+- Cloud Run does not promise to keep an instance even with the ping. For a guaranteed warm instance during a demo, deploy with `--min-instances 1` and set it back to 0 afterwards; an idle instance is billed every hour it runs.
