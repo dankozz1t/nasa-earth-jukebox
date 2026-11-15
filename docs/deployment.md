@@ -87,7 +87,7 @@ The deploy job signs in to Google Cloud without a stored key, through Workload I
 deploy/cloud-run/setup-github.sh <project-id> [owner/repo]
 ```
 
-The script creates the pool and provider `github`, and the service account `github-deployer` with only the roles a deploy needs. Only workflows of that repository can sign in as it. It prints the provider and the account email that go into `ci-cd.yml`; neither is a secret. In CI, `deploy.sh` skips the one-time setup (APIs, IAM, image repository, Scheduler job), which needs an owner.
+The script creates the pool and provider `github`, and the service account `github-deployer` with only the roles a deploy needs. Only workflows of that repository can sign in as it. The trust goes to the repository ID, not its name, so a transfer to another organization or a rename keeps deploys working, and a new repository that takes the old name cannot sign in. It prints the provider and the account email that go into `ci-cd.yml`; neither is a secret. In CI, `deploy.sh` skips the one-time setup (APIs, IAM, image repository, Scheduler job), which needs an owner.
 
 To stop deploying from CI, delete the service account `github-deployer`, or disable the workflow in the Actions tab.
 
