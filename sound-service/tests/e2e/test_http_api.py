@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from earth_sound.bootstrap.container import build_app
 from earth_sound.bootstrap.settings import Settings
 from tests.fakes.frames import png_bytes, two_plume_frame
+from tests.fakes.weather import FakeWeather, NoComposer
 
 COLORBAR = (Path(__file__).resolve().parents[1] / "fixtures" / "colorbar.png").read_bytes()
 
@@ -16,7 +17,9 @@ COLORBAR = (Path(__file__).resolve().parents[1] / "fixtures" / "colorbar.png").r
 @pytest.fixture(scope="module")
 def client() -> TestClient:
     settings = Settings(sample_rate=8000, bins=32, max_upload_mb=1, cache_size=2)
-    return TestClient(build_app(settings))
+    # Fakes, not the real adapters: the real weather source starts a live Open-Meteo fetch in a
+    # background thread that runs on into later tests and lands in their patched network calls.
+    return TestClient(build_app(settings, weather=FakeWeather(), composer=NoComposer()))
 
 
 @pytest.fixture(scope="module")
