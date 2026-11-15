@@ -73,6 +73,24 @@ Logs: **Cloud Run → earth-jukebox → Logs** in the console, or:
 gcloud run services logs read earth-jukebox --region europe-west1 --project <project-id>
 ```
 
+## CI/CD (GitHub Actions)
+
+[.github/workflows/ci-cd.yml](../.github/workflows/ci-cd.yml) does two things:
+- **On every pull request:** runs the tests and linters of all three services. The jobs are `frontend` (ESLint, Prettier, Vitest, build), `sound-service` (ruff, pytest) and `backend` (`dotnet test`).
+- **On a push to `main` (a merged PR):** when all three jobs pass, the `deploy` job runs `deploy/cloud-run/deploy.sh` with `DEPLOY_CI=1`, then checks `/api/health`.
+
+A manual run from the **Actions** tab (`workflow_dispatch`) on `main` deploys too.
+
+The deploy job signs in to Google Cloud without a stored key, through Workload Identity Federation. A project owner sets this up once:
+
+```bash
+deploy/cloud-run/setup-github.sh <project-id> [owner/repo]
+```
+
+The script creates the pool and provider `github`, and the service account `github-deployer` with only the roles a deploy needs. Only workflows of that repository can sign in as it. It prints the provider and the account email that go into `ci-cd.yml`; neither is a secret. In CI, `deploy.sh` skips the one-time setup (APIs, IAM, image repository, Scheduler job), which needs an owner.
+
+To stop deploying from CI, delete the service account `github-deployer`, or disable the workflow in the Actions tab.
+
 ## Run the container locally
 
 ```bash
