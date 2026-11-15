@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Start the sound service, the backend and nginx. If any of them exits, the container stops
-# and the Space restarts it.
+# and Cloud Run starts a new one.
 set -euo pipefail
 
 # same variable name as compose.yaml and .env.example

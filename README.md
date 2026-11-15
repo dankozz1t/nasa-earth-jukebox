@@ -101,7 +101,7 @@ How the parts fit: [docs/architecture.md](docs/architecture.md).
 | [api.md](docs/api.md) | Public HTTP API |
 | [ai.md](docs/ai.md) | The optional AI composer and AI tools used |
 | [development.md](docs/development.md) | Running, testing and troubleshooting |
-| [deployment.md](docs/deployment.md) | Publishing to a free Hugging Face Space |
+| [deployment.md](docs/deployment.md) | Publishing to Google Cloud Run |
 
 ## Credits
 

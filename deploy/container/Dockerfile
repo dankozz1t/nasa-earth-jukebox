@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
-# Earth Jukebox as one container for a Hugging Face Docker Space.
-# nginx :7860 serves the frontend and proxies /api to the backend (127.0.0.1:8080),
-# which calls the sound service (127.0.0.1:8000). One container wakes up once on the free tier.
-# Build from the repository root:  docker build -f deploy/hf-space/Dockerfile -t earth-jukebox-space .
+# Earth Jukebox as one container for Google Cloud Run (deploy/cloud-run/deploy.sh).
+# nginx :8080 serves the frontend and proxies /api to the backend (127.0.0.1:5080),
+# which calls the sound service (127.0.0.1:8000). One container starts once after scaling to zero.
+# Build from the repository root:  docker build -f deploy/container/Dockerfile -t earth-jukebox .
 
 FROM node:22-alpine AS frontend
 WORKDIR /src
@@ -42,16 +42,16 @@ RUN ln -s /usr/share/dotnet/dotnet /usr/local/bin/dotnet \
 COPY --from=sound /app/.venv /app/sound/.venv
 COPY --from=backend /out /app/backend
 COPY --from=frontend /src/dist /app/www
-COPY deploy/hf-space/nginx.conf /app/nginx.conf
-COPY --chmod=755 deploy/hf-space/start.sh /app/start.sh
+COPY deploy/container/nginx.conf /app/nginx.conf
+COPY --chmod=755 deploy/container/start.sh /app/start.sh
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
     ES_HOST=127.0.0.1 ES_PORT=8000 \
-    ASPNETCORE_URLS=http://127.0.0.1:8080 ASPNETCORE_ENVIRONMENT=Production DOTNET_gcServer=0 \
+    ASPNETCORE_URLS=http://127.0.0.1:5080 ASPNETCORE_ENVIRONMENT=Production DOTNET_gcServer=0 \
     SoundService__BaseUrl=http://127.0.0.1:8000/
-# Spaces run the container as uid 1000
+# run as a non-root user
 USER 1000
 WORKDIR /app
-EXPOSE 7860
+EXPOSE 8080
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/app/start.sh"]

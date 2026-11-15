@@ -11,6 +11,6 @@ Short notes on how Earth Jukebox works. Start with the [main README](../README.m
 | [accessibility.md](accessibility.md) | Features for blind, low-vision, deaf and other users |
 | [ai.md](ai.md) | The optional AI composer, and how AI tools were used to build the project |
 | [development.md](development.md) | Scripts, tests, project layout, conventions |
-| [deployment.md](deployment.md) | Publish the app to a free Hugging Face Space as one container |
+| [deployment.md](deployment.md) | Publish the app as one container to Google Cloud Run |
 | [audio/](audio/README.md) | Rendered samples to listen to without installing the app |
 | [screenshots/](screenshots/README.md) | Screenshots of every main screen, English and Ukrainian |
