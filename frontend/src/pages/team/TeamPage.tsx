@@ -48,7 +48,7 @@ export const TEAM: ReadonlyArray<{
     name: "Nazar Khozin",
     handle: "errorNum",
     country: "de",
-    social: { network: "linkedin", url: "https://www.linkedin.com/in/argonaut" },
+    social: { network: "linkedin", url: "https://www.linkedin.com/in/%D0%B0rgonaut/" },
   },
   {
     name: "Ihor Moroz",
