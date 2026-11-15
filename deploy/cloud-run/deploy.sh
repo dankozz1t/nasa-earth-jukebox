@@ -16,7 +16,8 @@ cd "$ROOT"
 gc() { gcloud --project "$PROJECT" --quiet "$@"; }
 
 echo "== APIs"
-gc services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com
+gc services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com \
+  secretmanager.googleapis.com cloudscheduler.googleapis.com
 
 NUMBER="$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')"
 RUNTIME_SA="${NUMBER}-compute@developer.gserviceaccount.com"
@@ -59,4 +60,18 @@ gc run deploy "$SERVICE" --image "$IMAGE" --region "$REGION" --port 8080 \
   --set-env-vars "ES_AI_DAILY_LIMIT=${ES_AI_DAILY_LIMIT:-100},AI_PER_VISITOR_HOUR=${AI_PER_VISITOR_HOUR:-10}"
 
 URL="$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format='value(status.url)')"
+
+# Cloud Run stops an idle instance after about 15 minutes. A health check every 10 minutes keeps
+# it warm, so visitors skip the cold start. Billing is per request, so the pings cost next to nothing;
+# Cloud Scheduler gives 3 jobs per billing account for free.
+echo "== keep-warm ping every 10 minutes"
+JOB="$SERVICE-warmup"
+JOB_ARGS=(--location "$REGION" --schedule "*/10 * * * *" --http-method GET
+  --uri "$URL/api/health" --attempt-deadline 60s)
+if gc scheduler jobs describe "$JOB" --location "$REGION" >/dev/null 2>&1; then
+  gc scheduler jobs update http "$JOB" "${JOB_ARGS[@]}" >/dev/null
+else
+  gc scheduler jobs create http "$JOB" "${JOB_ARGS[@]}" >/dev/null
+fi
+
 echo "done: $URL"

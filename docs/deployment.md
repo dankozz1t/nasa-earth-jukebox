@@ -59,7 +59,8 @@ The script:
 - turns on the APIs it needs;
 - creates an image repository in Artifact Registry;
 - builds the image with Cloud Build (5–10 min the first time);
-- deploys the `earth-jukebox` service in `europe-west1`.
+- deploys the `earth-jukebox` service in `europe-west1`;
+- creates a Cloud Scheduler job, `earth-jukebox-warmup`, that opens `/api/health` every 10 minutes. Cloud Run stops an idle instance after about 15 minutes, so the ping keeps it warm and visitors skip the cold start. Billing is per request, so the pings cost next to nothing, and Cloud Scheduler gives 3 jobs per billing account for free. Pause or delete the job in **Cloud Scheduler** in the console.
 
 It prints the public URL, `https://earth-jukebox-….run.app`. Run the same command again to deploy a new version. It deploys the working tree, uncommitted changes included, and tags the image `-dirty` when there are any. Another region goes second: `deploy/cloud-run/deploy.sh <project-id> us-central1`.
 
@@ -84,4 +85,4 @@ Open <http://localhost:8090>. Add `--env-file .env` to try it with your AI key.
 
 - Keys live only in Secret Manager, never in the repository or the image.
 - After a start the live weather loads in the background. The bundled snapshot plays for the first minutes, and the UI says so.
-- Open the app a minute before a demo so it is awake.
+- Cloud Run does not promise to keep an instance even with the ping. For a guaranteed warm instance during a demo, deploy with `--min-instances 1` and set it back to 0 afterwards; an idle instance is billed every hour it runs.
