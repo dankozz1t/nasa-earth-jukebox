@@ -28,5 +28,11 @@ export {
   refreshLiveForNewReading,
   subscribePlayStart,
 } from "./engine";
-export { usePickProgress, usePreset, usePresetUrlSync } from "./usePreset";
+export {
+  usePickProgress,
+  usePreset,
+  usePresetUrlSync,
+  useStageSelection,
+  useSwitchSource,
+} from "./usePreset";
 export { adjacentPreset, focusSleeve, shelfItems } from "./shelf";

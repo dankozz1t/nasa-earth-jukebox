@@ -4,6 +4,7 @@
 
 import { isCancelledError, type QueryClient, type QueryKey } from "@tanstack/react-query";
 import { create } from "zustand";
+import { canStartAudio } from "../../audio/activation";
 import { getPlayer } from "../../audio/player-instance";
 import type { Repeat, StemPlayer } from "../../audio/stem-player";
 import { ApiError, type SectionKey, type WeatherSoundscape } from "../../shared/api";
@@ -13,14 +14,16 @@ import type { ToastOptions } from "../../shared/ui";
 import { setPref, usePrefs } from "../access/prefs.store";
 import { createTour, type Tour } from "../live/model/tour";
 import { composeLive, composePreset, rulesFirst } from "./compose";
-import { DEFAULT_PRESET, presetById, type Preset, type PresetId } from "./presets";
+import { DEFAULT_PRESET, firstPreset, presetById, type Preset, type PresetId } from "./presets";
 import {
   findPreset,
   isWeather,
   mixFor,
+  pieceOnStage,
   stemKeys,
   useSession,
   type SessionPresetId,
+  type Source,
 } from "./session.store";
 import type { SleeveProgress } from "./Sleeve";
 import { stemsCache } from "./stems-cache";
@@ -367,6 +370,7 @@ async function warm(deps: PresetDeps, preset: Preset, run: PickRun): Promise<voi
 
   const s = await composePreset(deps.queryClient, preset, signal, run.keys);
   if (!getPlayer().ready) useSession.getState().show(s, mixFor(preset, stemKeys(s)));
+  else useSession.getState().remember(s);
 
   setProgress(run, { phase: "download", pct: 0 });
   await stemsCache.get(s, signal, downloadProgress(run));
@@ -433,10 +437,13 @@ function startRun(deps: PresetDeps, id: SessionPresetId, play: boolean): PickRun
   return run;
 }
 
+// `load` (without `play`) puts the piece on the player in silence, for Play and the map's hover voices. It
+// needs an AudioContext, so only after a gesture; a tour preset is only warmed.
 export async function pickPreset(
   deps: PresetDeps,
   id: SessionPresetId,
   play: boolean,
+  load = false,
 ): Promise<void> {
   const preset = presetOf(id);
   if (!preset) return;
@@ -465,8 +472,14 @@ export async function pickPreset(
   });
 
   try {
-    if (!play) {
+    if (!play && (!load || isTour(preset))) {
       await warm(deps, preset, run);
+      return;
+    }
+    if (!play) {
+      if (!(await loadSingle(deps, preset, run)) || signal.aborted) return;
+
+      useSession.getState().setStaged(false);
       return;
     }
 
@@ -532,6 +545,58 @@ export function subscribePlayStart(
   };
 }
 
+// The record the shown row plays: the selection when it is of this row, else the row's first record.
+function rowTarget(): SessionPresetId {
+  const { presetId, source, custom } = useSession.getState();
+  return findPreset(presetId, custom)?.source === source ? presetId : firstPreset(source).id;
+}
+
+function onPlayer(id: SessionPresetId): boolean {
+  const player = getPlayer();
+  const { soundscape, source, staged } = useSession.getState();
+
+  return (
+    player.ready &&
+    !staged &&
+    player.getSnapshot().tag === id &&
+    pieceOnStage(soundscape, source) !== undefined
+  );
+}
+
+let staging: { id: SessionPresetId; promise: Promise<boolean> } | null = null;
+
+// Puts the shown row's record on the player without sound, once the page may make sound. Many hovers
+// share one load. True when the player holds it.
+export function stageSelection(deps: PresetDeps): Promise<boolean> {
+  const id = rowTarget();
+  if (onPlayer(id)) return Promise.resolve(true);
+  if (!canStartAudio() || isPlayPending() || getPlayer().playing) return Promise.resolve(false);
+  if (staging?.id === id) return staging.promise;
+
+  const promise = pickPreset(deps, id, false, true).then(
+    () => onPlayer(id),
+    () => false,
+  );
+  staging = { id, promise };
+  void promise.finally(() => {
+    if (staging?.promise === promise) staging = null;
+  });
+  return promise;
+}
+
+// The switch between the archive and live: the other source's music stops, the row comes back to its own
+// record, and that record waits on the player, so Play and the map answer at once.
+export function switchSource(deps: PresetDeps, source: Source): void {
+  const session = useSession.getState();
+  if (session.source === source) return;
+
+  const player = getPlayer();
+  cancelPendingPlay();
+  if (player.playing) player.pause();
+  session.setSource(source);
+  void stageSelection(deps);
+}
+
 // Compose JSON only: stems are never prefetched in bulk.
 export function prefetchCompose(deps: PresetDeps, id: PresetId): void {
   const preset = presetById(id);
@@ -542,7 +607,13 @@ export async function prefetchDefault(deps: PresetDeps): Promise<void> {
   const preset = presetById(useSession.getState().presetId) ?? presetById(DEFAULT_PRESET)!;
 
   try {
-    await stemsCache.get(await composePreset(deps.queryClient, preset));
+    const s = await composePreset(deps.queryClient, preset);
+    // The map of a fresh page can be explored before anything plays.
+    const { soundscape, presetId } = useSession.getState();
+    if (!soundscape && !getPlayer().ready && presetId === preset.id) {
+      useSession.getState().show(s, mixFor(preset, stemKeys(s)));
+    }
+    await stemsCache.get(s);
   } catch {
     // A click will try again and show the error then.
   }
@@ -551,6 +622,7 @@ export async function prefetchDefault(deps: PresetDeps): Promise<void> {
 export function resetPresetEngine(): void {
   current?.ctrl.abort();
   current = null;
+  staging = null;
   tour?.stop();
   tour = null;
   tourRun = null;

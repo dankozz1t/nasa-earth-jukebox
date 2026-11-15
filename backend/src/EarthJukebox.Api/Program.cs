@@ -55,6 +55,7 @@ builder.Services.AddOptions<ForwardedHeadersOptions>().Configure(o =>
 });
 
 builder.Services.AddSingleton<AiQuota>();
+builder.Services.AddSingleton<WeatherSchedule>();
 
 // Composing renders audio, so limit it per client address. The limit is read per request so tests can change it.
 builder.Services.AddRateLimiter(o =>

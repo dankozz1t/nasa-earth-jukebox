@@ -150,13 +150,28 @@
   justify-content: space-between;
   gap: var(--s-2) var(--s-3);
 }
+/* A fixed height: the words change on every pointer move, and a line that grew and shrank would push the
+   page up and down. A longer text ends in an ellipsis; the explorer's value text and the captions carry it
+   whole. */
 .readout {
+  --lines: 2;
   flex: 1 1 16rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--lines);
+  line-clamp: var(--lines);
+  overflow: hidden;
+  height: calc(var(--lines) * 1.5em);
   margin: 0;
-  min-height: 1.5em;
   font-family: var(--font-mono);
   font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--ink-2);
+}
+@media (max-width: 599px) {
+  .readout {
+    --lines: 3;
+  }
 }
 .balance {
   display: inline-flex;

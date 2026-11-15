@@ -40,6 +40,9 @@
   --player-h: 128px;
   /* Page width: 1280 px up to 1600 px windows, then most of the window (see the media rule below). */
   --page-max: 1280px;
+  /* Everything on the home screen above the map's bottom edge except the map: header, shelf, the line
+     under the map and the gaps. The map's height is the window's height less this and the player bar. */
+  --above: 392px;
 
   color-scheme: light;
 }
@@ -94,9 +97,17 @@
   --dur: 0ms;
 }
 
-/* Very large screens use the room: a wider page, capped so lines and the map do not stretch forever. */
+/* Very large screens use the room: a wider page, capped so lines and the map do not stretch forever. The
+   cap also follows the height. A 21:9 or 32:9 screen is short for its width, and the map there is as tall as
+   the window allows, so the page is that map plus a side column of readable width, centred, like on an
+   ordinary monitor, instead of a strip with a vast empty column beside it. */
 @media (min-width: 1600px) {
   :root {
-    --page-max: min(92vw, 2200px);
+    --above: calc(392px + 4rem);
+    --page-max: min(
+      92vw,
+      2200px,
+      calc((100dvh - var(--player-h) - var(--above)) * 16 / 9 + 36rem + 3 * var(--s-6))
+    );
   }
 }

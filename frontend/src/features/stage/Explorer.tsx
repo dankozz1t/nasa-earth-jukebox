@@ -6,6 +6,7 @@ import { moveCursor, type AerosolCursor } from "./draw-aerosols";
 import type { LatLon } from "./draw-weather";
 import {
   aerosolNowText,
+  aerosolOnPlayer,
   aerosolSpot,
   columnX,
   releaseProbe,
@@ -32,6 +33,7 @@ type ExplorerProps = Common &
         classMap: Uint8Array | null;
         cursor: AerosolCursor;
         onCursor(c: AerosolCursor): void;
+        onNeedSound?(): Promise<boolean>;
       }
     | {
         kind: "live";
@@ -159,7 +161,10 @@ export function Explorer(props: ExplorerProps) {
       const x = columnX(s, c.step);
       const spot = aerosolSpot(s, props.classMap, x, c.y * s.height);
       getNarrator().speak(spot.text);
-      soundAerosolSpot(s, x, spot.mix, props.muted, props.vibrate);
+      const { muted, vibrate } = props;
+      const sound = () => soundAerosolSpot(s, x, spot.mix, muted, vibrate);
+      if (aerosolOnPlayer(s)) sound();
+      else void props.onNeedSound?.().then((ok) => ok && sound());
     } else {
       const d = WEATHER_KEYS(e.shiftKey ? 20 : 5)[e.key];
       const section = props.soundscape?.section ?? props.section;

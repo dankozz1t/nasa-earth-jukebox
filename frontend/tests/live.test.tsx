@@ -406,6 +406,20 @@ describe("useLiveUpdates", () => {
     expect(useNowText.getState().text).toBe("");
   });
 
+  it("the archive asks for no weather; showing live fetches the grid once", async () => {
+    const c = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    useSession.setState({ source: "nasa" });
+    const gridCalls = () =>
+      vi.mocked(fetch).mock.calls.filter(([url]) => url === "/api/weather/grid").length;
+    renderHarness(c);
+    await flush();
+    expect(gridCalls()).toBe(0);
+
+    act(() => useSession.setState({ source: "live" }));
+    await flush();
+    expect(gridCalls()).toBe(1);
+  });
+
   it("a new reading while the archive is on stage changes no live signal", async () => {
     const c = client(makeGrid());
     useSession.setState({ source: "nasa" });

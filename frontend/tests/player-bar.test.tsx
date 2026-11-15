@@ -200,8 +200,15 @@ describe("player bar", () => {
     renderApp("/", seededClient());
     expect(within(bar()).getByText(en["player.now"])).toBeInTheDocument();
     expect(within(bar()).getByText(en["preset.live-heat.title"])).toBeInTheDocument();
-    act(() => player.set({ playing: false }));
+    act(() => player.set({ playing: false, position: 12 }));
     expect(within(bar()).getByText(en["player.paused"])).toBeInTheDocument();
+  });
+
+  it("a piece put on the player in silence (a source switch) is ready to play, not paused", () => {
+    player.set({ ready: true, playing: false, duration: 60, position: 0, tag: "live-heat" });
+    renderApp("/", seededClient());
+    expect(within(bar()).getByText(en["player.ready"])).toBeInTheDocument();
+    expect(within(bar()).getByText(en["preset.live-heat.title"])).toBeInTheDocument();
   });
 
   it("the Instruments toggle opens volume and the chips, Escape closes it and returns focus", async () => {

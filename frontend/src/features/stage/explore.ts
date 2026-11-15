@@ -1,3 +1,4 @@
+import { canStartAudio } from "../../audio/activation";
 import { getPlayer } from "../../audio/player-instance";
 import { vibrateFor } from "../../audio/narrator";
 import { ProbeVoice } from "../../audio/probe-voice";
@@ -11,7 +12,7 @@ import {
 import type { Lang } from "../../shared/i18n";
 import { describeSpot, describeStep, localMix, mapSentence } from "../aerosols";
 import { describeWeatherPoint, panFor, sampleGrid } from "../live/model/describe-weather";
-import { BED } from "../presets";
+import { BED, useSession } from "../presets";
 import { currentStep } from "./draw-aerosols";
 import { clampProbe, currentFrac, MAX_LAT, pathPoint, type LatLon } from "./draw-weather";
 
@@ -46,6 +47,11 @@ export function aerosolSpot(
   const mix = localMix(classMap, s.width, s.height, s.layers.length, x, y);
 
   return { text: describeSpot(s, x / s.width, y / s.height, mix), mix };
+}
+
+// The spots sound the piece the player holds, so it must be this one.
+export function aerosolOnPlayer(s: Soundscape): boolean {
+  return getPlayer().ready && useSession.getState().soundscape === s;
 }
 
 // Only once the player holds a piece, so no AudioContext appears before a gesture.
@@ -114,7 +120,8 @@ export function weatherProbe(
   };
 }
 
-// `gesture` is true for a click or key press; a plain pointer move may not create the AudioContext.
+// `gesture` is true for a click or key press. A plain pointer move may create the AudioContext only after the
+// person has interacted with the page; before that the browser keeps it silent.
 export function soundWeatherProbe(
   section: WeatherSection,
   p: WeatherProbe,
@@ -124,7 +131,7 @@ export function soundWeatherProbe(
   maxLat = MAX_LAT,
 ): void {
   const player = getPlayer();
-  if (player.playing || (!gesture && !player.ready)) return;
+  if (player.playing || (!gesture && !player.ready && !canStartAudio())) return;
 
   const { ctx, node } = player.input();
   void ctx.resume();

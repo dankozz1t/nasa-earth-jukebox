@@ -61,6 +61,13 @@
   }
 }
 
+/* Phones: the source switch spans the row, its two halves even, like the shelf under it. */
+@media (max-width: 479px) {
+  .switch {
+    justify-self: stretch;
+  }
+}
+
 @media (min-width: 768px) {
   .home {
     gap: var(--s-5);
@@ -89,16 +96,16 @@
   }
 }
 
-/* The stage column is capped by the window height (the map is 2:1), so map and player bar fit one screen;
+/* The stage column is capped by the window height, so map and player bar fit one screen. The cap takes the
+   archive frame's 16:9 (the live map is 2:1, so it fits too), and both sources keep one layout;
    the side column takes what is left. The cap has a floor: on a short window or at a high zoom the map
    stays 560 px wide (280 px tall) and the page scrolls, instead of shrinking to a strip. 560 px, the gap
    and the 320 px side column are 896 px, and the page is 944 px wide from 1024 px, so they always fit; below
    1024 px the one-column layouts above already put the side blocks under the map. */
 @media (min-width: 1024px) {
   .home {
-    --above: 402px;
     grid-template-columns:
-      minmax(min(100%, 560px), max(560px, calc((100dvh - var(--player-h) - var(--above)) * 2)))
+      minmax(min(100%, 560px), max(560px, calc((100dvh - var(--player-h) - var(--above)) * 16 / 9)))
       minmax(320px, 1fr);
     grid-template-rows: auto auto auto 1fr;
     grid-template-areas:
@@ -127,7 +134,6 @@
    (base.css), instead of a 1280 px column lost in the middle. */
 @media (min-width: 1600px) {
   .home {
-    --above: calc(402px + 6rem);
     column-gap: var(--s-6);
     padding-inline: var(--s-6);
   }

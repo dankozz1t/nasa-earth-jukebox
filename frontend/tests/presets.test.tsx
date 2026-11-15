@@ -9,6 +9,7 @@ import {
   type PresetId,
 } from "../src/features/presets";
 import { COVERS, mixStart, shelfItems, useSession } from "../src/features/presets";
+import { mixFor } from "../src/features/presets/session.store";
 import { setLang } from "../src/shared/i18n";
 
 afterEach(() => {
@@ -102,6 +103,18 @@ describe("PRESETS", () => {
     for (const p of NASA) {
       expect(p.source === "nasa" && p.bed).toBe(true);
     }
+  });
+
+  it("the quick tour starts with sea salt muted, the other records with every voice on", () => {
+    const keys = ["black_carbon", "dust", "sea_salt", "sulfate", "bed"];
+    const off = (id: PresetId) =>
+      Object.entries(mixFor(presetById(id)!, keys))
+        .filter(([, muted]) => muted)
+        .map(([k]) => k);
+
+    expect(off("nasa-quick")).toEqual(["sea_salt"]);
+    expect(off("nasa-four")).toEqual([]);
+    expect(off("nasa-scale")).toEqual([]);
   });
 
   it("every preset has its own cover, and the person's own mix has another one", () => {

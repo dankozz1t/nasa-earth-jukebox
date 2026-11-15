@@ -17,6 +17,9 @@ public sealed class StubWeather : HttpMessageHandler
     public const string Id = "fedcba9876543210";
     public List<(HttpMethod Method, string Path, string Body)> Calls { get; } = [];
     public bool GibsReturnsXml { get; set; }
+    public string GridJson { get; set; } = """{"lats":[0],"lons":[0],"values":{}}""";
+    public string ReadingsJson { get; set; } = """{"readings":[]}""";
+    public bool GridFails { get; set; }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
@@ -34,8 +37,9 @@ public sealed class StubWeather : HttpMessageHandler
         return uri.AbsolutePath switch
         {
             "/v1/weather/sections" => Json("""[{"key":"temperature"}]"""),
-            "/v1/weather/grid" => Json("""{"lats":[0],"lons":[0],"values":{}}"""),
-            "/v1/weather/readings" => Json("""{"readings":[]}"""),
+            "/v1/weather/grid" when GridFails => new HttpResponseMessage(HttpStatusCode.InternalServerError),
+            "/v1/weather/grid" => Json(GridJson),
+            "/v1/weather/readings" => Json(ReadingsJson),
             "/v1/weather/composer" => Json("""{"aiAvailable":false}"""),
             "/v1/weather/soundscapes" => Json("{\"id\":\"" + Id + "\",\"artifacts\":{\"mix\":\"mix.wav\",\"stems\":{\"lead\":\"stems/lead.wav\"}}}"),
             var p when p == $"/v1/weather/soundscapes/{Id}/mix.wav" => Wav(),
@@ -128,6 +132,83 @@ public sealed class WeatherTests(WeatherFactory factory) : IClassFixture<Weather
         Assert.Equal(before, factory.Stub.Calls.Count);
     }
 
+    [Theory]
+    [InlineData("/api/weather/sections", 86400)]
+    [InlineData("/api/weather/composer", 300)]
+    public async Task Config_reads_are_cacheable_and_revalidate_with_304(string url, int seconds)
+    {
+        var r = await _client.GetAsync(url);
+        Assert.True(r.Headers.CacheControl!.Public);
+        Assert.Equal(TimeSpan.FromSeconds(seconds), r.Headers.CacheControl.MaxAge);
+        Assert.NotNull(r.Headers.ETag);
+
+        var again = new HttpRequestMessage(HttpMethod.Get, url);
+        again.Headers.IfNoneMatch.Add(r.Headers.ETag!);
+        var notModified = await _client.SendAsync(again);
+        Assert.Equal(HttpStatusCode.NotModified, notModified.StatusCode);
+        Assert.Empty(await notModified.Content.ReadAsByteArrayAsync());
+    }
+
+    [Fact]
+    public async Task Grid_and_readings_expire_at_the_next_update()
+    {
+        var next = DateTimeOffset.UtcNow.AddMinutes(10).ToString("O");
+        factory.Stub.GridJson = $$"""{"values":{},"isSnapshot":false,"nextUpdateAt":"{{next}}"}""";
+        factory.Stub.ReadingsJson = """{"readings":[{"observedAt":"2026-11-15T10:00","isSnapshot":false}]}""";
+        var grid = (await _client.GetAsync("/api/weather/grid")).Headers.CacheControl!;
+        var readings = (await _client.GetAsync("/api/weather/readings")).Headers.CacheControl!;
+        Assert.True(grid.Public);
+        Assert.InRange(grid.MaxAge!.Value.TotalSeconds, 590, 600);
+        Assert.InRange(readings.MaxAge!.Value.TotalSeconds, 590, 600);
+
+        factory.Stub.GridJson = $$"""{"values":{},"isSnapshot":true,"nextUpdateAt":"{{next}}"}""";
+        Assert.Equal(TimeSpan.FromSeconds(60), (await _client.GetAsync("/api/weather/grid")).Headers.CacheControl!.MaxAge);
+        Assert.Equal(TimeSpan.FromSeconds(60), (await _client.GetAsync("/api/weather/readings")).Headers.CacheControl!.MaxAge);
+    }
+
+    [Theory]
+    [InlineData(-120, 0)] // refresh running: look again on the next poll
+    [InlineData(90, 90)]
+    [InlineData(6 * 3600, 1800)] // daily budget spent, next update at midnight
+    public void Max_age_runs_until_the_next_update_within_bounds(int dueInSeconds, int expected)
+    {
+        var now = new DateTimeOffset(2026, 11, 15, 10, 0, 0, TimeSpan.Zero);
+        Assert.Equal(TimeSpan.FromSeconds(expected), WeatherSchedule.MaxAge(now.AddSeconds(dueInSeconds), now));
+        Assert.Equal(WeatherSchedule.Fallback, WeatherSchedule.MaxAge(null, now));
+    }
+
+    [Theory]
+    [InlineData("""{"isSnapshot":false,"nextUpdateAt":"2026-11-15T10:31:30Z"}""", true)]
+    [InlineData("""{"isSnapshot":true,"nextUpdateAt":"2026-11-15T10:31:30Z"}""", false)]
+    [InlineData("""{"isSnapshot":false,"nextUpdateAt":null}""", false)]
+    [InlineData("not json", false)]
+    public void Only_a_live_grid_sets_the_schedule(string json, bool live)
+    {
+        Assert.Equal(live, WeatherSchedule.LiveNextUpdate(json) is not null);
+    }
+
+    [Fact]
+    public async Task Errors_and_compositions_are_not_cached()
+    {
+        factory.Stub.GridFails = true;
+        try
+        {
+            var failed = await _client.GetAsync("/api/weather/grid");
+            Assert.Equal(HttpStatusCode.BadGateway, failed.StatusCode);
+            Assert.Null(failed.Headers.CacheControl?.MaxAge);
+            Assert.Null(failed.Headers.ETag);
+        }
+        finally
+        {
+            factory.Stub.GridFails = false;
+        }
+        var composed = await _client.PostAsJsonAsync("/api/weather/soundscapes", new WeatherComposeRequest(Composer: "algorithmic"));
+        Assert.Equal(HttpStatusCode.OK, composed.StatusCode);
+        Assert.Null(composed.Headers.CacheControl);
+        var invalid = await _client.PostAsJsonAsync("/api/weather/soundscapes", new WeatherComposeRequest(Section: "pollen"));
+        Assert.Null(invalid.Headers.CacheControl);
+    }
+
     [Fact]
     public async Task Basemap_is_cached_and_xml_errors_are_rejected()
     {
@@ -139,6 +220,13 @@ public sealed class WeatherTests(WeatherFactory factory) : IClassFixture<Weather
         var ok = await _client.GetAsync("/api/weather/basemap");
         Assert.Equal(HttpStatusCode.OK, ok.StatusCode);
         Assert.Equal("image/jpeg", ok.Content.Headers.ContentType!.MediaType);
+        Assert.Null(bad.Headers.CacheControl?.MaxAge);
+        Assert.Equal(TimeSpan.FromDays(1), ok.Headers.CacheControl!.MaxAge);
+        Assert.True(ok.Headers.CacheControl.Public);
+        Assert.NotNull(ok.Content.Headers.LastModified);
+        var again = new HttpRequestMessage(HttpMethod.Get, "/api/weather/basemap");
+        again.Headers.IfNoneMatch.Add(ok.Headers.ETag!);
+        Assert.Equal(HttpStatusCode.NotModified, (await _client.SendAsync(again)).StatusCode);
         var gibsCalls = factory.Stub.Calls.Count(c => c.Path.Contains("wms.cgi"));
         await _client.GetAsync("/api/weather/basemap");
         Assert.Equal(gibsCalls, factory.Stub.Calls.Count(c => c.Path.Contains("wms.cgi"))); // second call comes from the cache

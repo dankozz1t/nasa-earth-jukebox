@@ -78,6 +78,30 @@ public sealed class ApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task Frames_are_cacheable_and_the_image_revalidates_with_304()
+    {
+        var list = await _client.GetAsync("/api/frames");
+        Assert.True(list.Headers.CacheControl!.Public);
+        Assert.Equal(TimeSpan.FromHours(1), list.Headers.CacheControl.MaxAge);
+
+        var image = await _client.GetAsync("/api/frames/svs-5669/image");
+        Assert.True(image.Headers.CacheControl!.Public);
+        Assert.Equal(TimeSpan.FromDays(1), image.Headers.CacheControl.MaxAge);
+        Assert.NotNull(image.Headers.ETag);
+        Assert.NotNull(image.Content.Headers.LastModified);
+
+        var byTag = new HttpRequestMessage(HttpMethod.Get, "/api/frames/svs-5669/image");
+        byTag.Headers.IfNoneMatch.Add(image.Headers.ETag!);
+        Assert.Equal(HttpStatusCode.NotModified, (await _client.SendAsync(byTag)).StatusCode);
+        var byDate = new HttpRequestMessage(HttpMethod.Get, "/api/frames/svs-5669/image");
+        byDate.Headers.IfModifiedSince = image.Content.Headers.LastModified;
+        Assert.Equal(HttpStatusCode.NotModified, (await _client.SendAsync(byDate)).StatusCode);
+
+        var missing = await _client.GetAsync("/api/frames/nope/image");
+        Assert.Null(missing.Headers.CacheControl?.MaxAge);
+    }
+
+    [Fact]
     public async Task Compose_sends_frame_and_colorbar_and_rewrites_artifact_urls()
     {
         var response = await _client.PostAsJsonAsync("/api/soundscapes", new ComposeRequest("svs-5669", "raw", 32, 3));

@@ -13,21 +13,23 @@ public sealed record BasemapOptions
     public int CacheHours { get; init; } = 24;
 }
 
+public sealed record BasemapImage(byte[] Bytes, DateTimeOffset LastModified, Microsoft.Net.Http.Headers.EntityTagHeaderValue ETag);
+
 // Cached in memory. If a refresh fails, the old image stays.
 public sealed class NasaBasemap(IHttpClientFactory clients, Microsoft.Extensions.Options.IOptions<BasemapOptions> options, ILogger<NasaBasemap> logger)
 {
     public const string ClientName = "nasa-gibs";
     private readonly SemaphoreSlim _lock = new(1, 1);
-    private byte[]? _image;
+    private BasemapImage? _image;
     private DateTimeOffset _fetchedAt;
 
-    public async Task<byte[]?> GetAsync(CancellationToken ct)
+    public async Task<BasemapImage?> GetAsync(CancellationToken ct)
     {
-        if (_image is not null && DateTimeOffset.UtcNow - _fetchedAt < TimeSpan.FromHours(options.Value.CacheHours)) return _image;
+        if (IsFresh()) return _image;
         await _lock.WaitAsync(ct);
         try
         {
-            if (_image is not null && DateTimeOffset.UtcNow - _fetchedAt < TimeSpan.FromHours(options.Value.CacheHours)) return _image;
+            if (IsFresh()) return _image;
             var http = clients.CreateClient(ClientName);
             using var response = await http.GetAsync(options.Value.Url, ct);
             var type = response.Content.Headers.ContentType?.MediaType;
@@ -37,8 +39,13 @@ public sealed class NasaBasemap(IHttpClientFactory clients, Microsoft.Extensions
                 logger.LogWarning("NASA GIBS basemap failed: {Status} {Type}", (int)response.StatusCode, type);
                 return _image;
             }
-            _image = await response.Content.ReadAsByteArrayAsync(ct);
+            var bytes = await response.Content.ReadAsByteArrayAsync(ct);
             _fetchedAt = DateTimeOffset.UtcNow;
+            // The same picture keeps its Last-Modified and ETag, so browsers revalidate with a 304.
+            if (_image is null || !_image.Bytes.AsSpan().SequenceEqual(bytes))
+            {
+                _image = new BasemapImage(bytes, _fetchedAt, Http.CacheHeaders.BytesTag(bytes));
+            }
             return _image;
         }
         catch (HttpRequestException e)
@@ -51,4 +58,7 @@ public sealed class NasaBasemap(IHttpClientFactory clients, Microsoft.Extensions
             _lock.Release();
         }
     }
+
+    private bool IsFresh() =>
+        _image is not null && DateTimeOffset.UtcNow - _fetchedAt < TimeSpan.FromHours(options.Value.CacheHours);
 }
