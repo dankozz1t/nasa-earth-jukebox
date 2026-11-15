@@ -40,10 +40,10 @@ describe("team members", () => {
       "https://www.linkedin.com/in/veryovkasergiy/",
       "https://www.tiktok.com/@saiko_sakana",
       "https://www.linkedin.com/in/nazar-drahusevych",
-      "https://www.linkedin.com/in/argonaut",
+      "https://www.linkedin.com/in/%D0%B0rgonaut/",
       "https://www.linkedin.com/in/remmover/",
     ]);
-    // Latin letters only: one slug was once typed with a Cyrillic "a".
+    // Printable ASCII only. One profile slug really starts with a Cyrillic "а", so it is percent-encoded (%D0%B0).
     for (const m of TEAM) expect(m.social.url).toMatch(/^[\x21-\x7e]+$/);
     expect(TEAM.map((m) => m.country)).toEqual(["es", "ua", "ua", "de", "de", "es"]);
   });
