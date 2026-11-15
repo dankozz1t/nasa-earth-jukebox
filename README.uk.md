@@ -2,13 +2,15 @@
 
 [English](README.md) · **Українська**
 
-**Почуйте планету, яку показує NASA.** Earth Jukebox перетворює візуалізацію аерозолів NASA і погоду всієї планети просто зараз на музику, яку можна досліджувати на слух. Застосунок зроблено насамперед для незрячих і слабозорих людей, а також для всіх, кому легше зрозуміти дані через звук. Створено для NASA Space Apps Challenge 2026, челендж [The Earth Information Jukebox](https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/).
+**Почуйте планету, яку показує NASA.** Earth Jukebox перетворює візуалізацію аерозолів NASA і погоду всієї планети просто зараз на музику, яку можна досліджувати на слух. Застосунок зроблено насамперед для незрячих і слабозорих людей, а також для всіх, кому легше зрозуміти дані через звук. Створено для NASA Space Apps Challenge 2026, челендж [The Earth Information Jukebox](https://www.spaceappschallenge.org/2026/challenges/the-earth-information-jukebox/), команда DivineRapier ([сторінка проєкту](https://www.spaceappschallenge.org/2026/find-a-team/divinerapier/?tab=project)).
+
+**Спробуйте просто зараз, нічого встановлювати не треба:** <https://earth-jukebox-693055241155.europe-west1.run.app/>. Наша презентація: [English](docs/presentation/earth-jukebox-en.pdf) · [Українська](docs/presentation/earth-jukebox-uk.pdf).
 
 ![Earth Jukebox грає кадр аерозолів NASA: лінія проходить картою, підпис називає, що звучить](docs/screenshots/uk/home-nasa.png)
 
 *Чотири аерозолі* грає кадр NASA SVS 5669 із заходу на схід. Сажа, пил, морська сіль і сульфати мають кожен свій інструмент. Вищі ноти означають північніше, гучніше означає більшу частку карти, а підпис каже, що звучить просто зараз.
 
-🎧 **Спершу послухайте:** [Чотири аерозолі](docs/audio/four-aerosols.mp3) · [М'яка гама](docs/audio/gentle-scale.mp3) · [Дощ зараз](docs/audio/rain-right-now.mp3) (MP3, близько хвилини кожен, [що звучить](docs/audio/README.md), англійською)
+🎧 **Послухайте просто в браузері:** [Чотири аерозолі](https://earth-jukebox-693055241155.europe-west1.run.app/?p=nasa-four) · [Швидкий огляд](https://earth-jukebox-693055241155.europe-west1.run.app/?p=nasa-quick) · [Дощ зараз](https://earth-jukebox-693055241155.europe-west1.run.app/?p=live-rain) (кожне посилання відкриває застосунок з уже вибраною платівкою; натисніть Play)
 
 ## Що можна робити
 
@@ -83,7 +85,7 @@ scripts/start.sh        # Windows PowerShell: .\scripts\start.ps1
 frontend/        вебзастосунок на React + TypeScript, програвач, доступність
 backend/         API на C# ASP.NET Core перед звуковим сервісом
 sound-service/   сервіс на Python, що перетворює зображення й погоду на музику
-docs/            документація, скриншоти, аудіоприклади
+docs/            документація, скриншоти, презентація
 scripts/         start, stop, logs, dev, test
 compose.yaml     запускає три сервіси разом
 ```
@@ -104,6 +106,19 @@ compose.yaml     запускає три сервіси разом
 | [ai.md](docs/ai.md) | Необов'язковий AI-композитор і AI-інструменти розробки |
 | [development.md](docs/development.md) | Запуск, тести, розв'язання проблем |
 | [deployment.md](docs/deployment.md) | Публікація на Google Cloud Run |
+
+## Команда
+
+Ми — **команда DivineRapier**, шестеро людей, які зробили Earth Jukebox для NASA Space Apps Challenge 2026. Повні біографії, країни й контакти: сторінка [Команда](https://earth-jukebox-693055241155.europe-west1.run.app/team) у застосунку.
+
+| Ім'я | GitHub | Роль |
+|---|---|---|
+| Алекс Тейлор Данько | [@dankozz1t](https://github.com/dankozz1t) | Лідер, організатор, UI/UX і frontend-інженер |
+| Сергій Верьовка | [@Ephemerian](https://github.com/Ephemerian) | Комунікатор, менеджер, ідеолог |
+| Владислав Жулай | [@gonzaleshafler](https://github.com/gonzaleshafler) | Композитор, художник, музикант, ідеолог |
+| Назар Драгусевич | [@nazardrahusevych](https://github.com/nazardrahusevych) | Технічний інженер, впровадження ШІ |
+| Назар Хозін | [@kranel-argonavt](https://github.com/kranel-argonavt) | Технічний інженер, автор алгоритмів |
+| Ігор Мороз | [@remmover](https://github.com/remmover) | Інженер, tech lead, автор оригінальних алгоритмів |
 
 ## Подяки
 
