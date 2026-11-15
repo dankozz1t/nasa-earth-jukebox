@@ -1,0 +1,9 @@
+# Cloud Build: build the single-container image (deploy/container/Dockerfile) and push it to Artifact Registry.
+# Run by deploy/cloud-run/deploy.sh, which passes _IMAGE.
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ["build", "-f", "deploy/container/Dockerfile", "-t", "${_IMAGE}", "."]
+images: ["${_IMAGE}"]
+options:
+  logging: CLOUD_LOGGING_ONLY
+timeout: 1800s

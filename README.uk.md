@@ -103,6 +103,7 @@ compose.yaml     запускає три сервіси разом
 | [api.md](docs/api.md) | Публічний HTTP API |
 | [ai.md](docs/ai.md) | Необов'язковий AI-композитор і AI-інструменти розробки |
 | [development.md](docs/development.md) | Запуск, тести, розв'язання проблем |
+| [deployment.md](docs/deployment.md) | Публікація на Google Cloud Run |
 
 ## Подяки
 

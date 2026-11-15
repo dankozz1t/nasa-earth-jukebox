@@ -1,0 +1,21 @@
+# Files not uploaded to Cloud Build. The image needs only frontend/, backend/, sound-service/ and deploy/.
+# Never upload local keys.
+.env
+.env.*
+!.env.example
+.git/
+.github/
+.claude/
+.idea/
+.vscode/
+docs/
+scripts/
+**/node_modules/
+**/dist/
+**/bin/
+**/obj/
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+**/.mypy_cache/
