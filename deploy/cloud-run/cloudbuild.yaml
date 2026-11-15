@@ -3,6 +3,7 @@
 steps:
   - name: gcr.io/cloud-builders/docker
     args: ["build", "-f", "deploy/container/Dockerfile", "-t", "${_IMAGE}", "."]
+    env: ["DOCKER_BUILDKIT=1"] # the Dockerfile uses COPY --chmod
 images: ["${_IMAGE}"]
 options:
   logging: CLOUD_LOGGING_ONLY

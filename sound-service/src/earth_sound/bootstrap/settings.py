@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     max_upload_mb: int = Field(default=25, ge=1, le=100)
     max_image_width: int = Field(default=1920, ge=256, le=4096)
     cache_size: int = Field(default=8, ge=1, le=128)
+    max_parallel_renders: int = Field(default=2, ge=1, le=16)  # each render holds its audio in memory
     sample_rate: int = Field(default=22_050, ge=8_000, le=48_000)
     bins: int = Field(default=128, ge=16, le=512)
 

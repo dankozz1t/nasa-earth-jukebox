@@ -1,0 +1,98 @@
+# Tests on every pull request and push to main; a push to main (a merged PR) also deploys to Cloud Run.
+# Deploy signs in to Google Cloud without a stored key (Workload Identity Federation, see docs/deployment.md).
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --no-fund --no-audit
+      - run: npm run lint
+      - run: npm run format:check
+      # A few UI tests depend on timing and fail now and then on a busy machine
+      - run: npm test -- --retry=2
+      - run: npm run build # type-checks too
+
+  sound-service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sound-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: sound-service/pyproject.toml
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      # mypy is left out until its NumPy typing errors on main are fixed
+      - run: python -m pytest -q
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet test EarthJukebox.slnx
+
+  deploy:
+    needs: [frontend, sound-service, backend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # lets the job sign in to Google Cloud
+    concurrency:
+      group: deploy-cloud-run
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: https://earth-jukebox-693055241155.europe-west1.run.app
+    env:
+      GCP_PROJECT: nasa-earth-jukebox
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/693055241155/locations/global/workloadIdentityPools/github/providers/github
+          service_account: github-deployer@nasa-earth-jukebox.iam.gserviceaccount.com
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Build and deploy
+        run: deploy/cloud-run/deploy.sh "$GCP_PROJECT"
+        env:
+          DEPLOY_CI: "1"
+      - name: Smoke test
+        run: |
+          url=https://earth-jukebox-693055241155.europe-west1.run.app
+          curl -fsS --retry 5 --retry-delay 5 --retry-all-errors "$url/api/health"
+          curl -fsS -o /dev/null "$url/"
