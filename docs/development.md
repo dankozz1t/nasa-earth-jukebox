@@ -78,6 +78,7 @@ backend/             C# API (src/EarthJukebox.Api, tests/)
 sound-service/       Python: domain -> application -> adapters -> bootstrap
 docs/                this documentation, screenshots, audio samples, demo slides
 scripts/             start, stop, logs, dev, test
+deploy/hf-space/     one-container image for Hugging Face Spaces
 .claude/skills/      the start-app skill for coding agents
 ```
 
