@@ -1,0 +1,305 @@
+/* The engineering view: dense, monospace for identifiers, readable in light, dark and high contrast.
+   Every colour comes from the tokens; accents fill large areas only, text sits on paper, ink or sun. */
+
+.tech {
+  margin-block-start: var(--s-5);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+.tech code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding-inline: 0.2em;
+  background: var(--stone);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- contents ---------- */
+.toc {
+  padding: var(--s-4);
+  border: var(--border);
+  background: var(--paper);
+}
+.tocTitle {
+  margin: 0 0 var(--s-2);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.toc ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  columns: 2 16rem;
+  column-gap: var(--s-5);
+}
+.toc a {
+  display: inline-block;
+  min-height: 32px;
+  padding-block: var(--s-1);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+/* ---------- sections ---------- */
+.section {
+  margin-block-start: var(--s-6);
+  padding-block-start: var(--s-4);
+  border-block-start: var(--border);
+  display: grid;
+  gap: var(--s-4);
+  scroll-margin-block-start: var(--s-4);
+}
+.h2 {
+  margin: 0;
+  font-size: clamp(1.25rem, 4vw, 1.625rem);
+  overflow-wrap: break-word;
+}
+.secNum {
+  font-family: var(--font-mono);
+  color: var(--ink-2);
+}
+.h3 {
+  margin: var(--s-2) 0 0;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+.p {
+  margin: 0;
+  max-width: 90ch;
+}
+.list {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  display: grid;
+  gap: var(--s-1);
+  max-width: 100ch;
+}
+
+/* ---------- tables ---------- */
+.tableWrap {
+  overflow-x: auto;
+  max-width: 100%;
+  border: var(--border);
+  background: var(--paper);
+}
+.table {
+  width: 100%;
+  /* On a phone the table scrolls sideways inside its box instead of crushing its columns. */
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.tableCaption {
+  caption-side: top;
+  padding: var(--s-2) var(--s-3);
+  text-align: start;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  border-block-end: var(--border);
+}
+.table th,
+.table td {
+  padding: var(--s-2) var(--s-3);
+  border-block-end: 1px solid var(--ink-2);
+  text-align: start;
+  vertical-align: top;
+}
+.table thead th {
+  background: var(--ink);
+  color: var(--ground);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+.table tbody th {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-block-end: 0;
+}
+
+/* ---------- figures ---------- */
+.figure {
+  margin: 0;
+  display: grid;
+  gap: var(--s-2);
+}
+.scroller {
+  overflow-x: auto;
+  max-width: 100%;
+  border: var(--border);
+  background: var(--ground);
+}
+.scroller:focus-visible,
+.tableWrap:focus-visible {
+  outline-offset: 2px;
+}
+/* A drawing narrower than its box sits in the middle of it. One wider than the box (min-width is
+   80% of its natural size) scrolls sideways: auto margins fall to 0 on overflow, so no part of it is
+   pushed out of reach on the left the way centring with flex would. Figure opens it scrolled to the
+   middle. */
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+.caption {
+  max-width: 100ch;
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+
+/* Shapes. Set by class, not attribute, so the theme and high contrast reach them. */
+.boxPaper {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.boxThin {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.boxCobalt {
+  fill: var(--cobalt);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.boxSun {
+  fill: var(--sun);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+/* External systems: dashed, so they stand apart without relying on colour. */
+.boxExternal {
+  fill: var(--stone);
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+.line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.boundary {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 1.5;
+  stroke-dasharray: 8 5;
+}
+.boundaryLabel {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--ink-2);
+}
+
+.edge,
+.edgeDash,
+.edgeDot {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.75;
+}
+.edgeDash {
+  stroke-dasharray: 7 4;
+}
+.edgeDot {
+  stroke-dasharray: 2 4;
+}
+.headFill {
+  fill: var(--ink);
+}
+.headOpen {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.headHollow {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.nodeTitle {
+  font-family: var(--font-text);
+  font-size: 13px;
+  font-weight: 800;
+}
+.nodeTech {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+}
+.nodeLine {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+.onPaper {
+  fill: var(--ink);
+}
+/* Paper on cobalt: cream on deep green in light, dark on light green in dark. */
+.onCobalt {
+  fill: var(--paper);
+}
+.onSun {
+  fill: var(--on-accent);
+}
+
+/* Labels on arrows carry a halo of the background so they stay legible over lines. */
+.edgeLabel,
+.msgLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: var(--ground);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.lifeline {
+  stroke: var(--ink-2);
+  stroke-width: 1.25;
+  stroke-dasharray: 4 4;
+}
+.fragment {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.25;
+}
+.fragmentTab {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 1.25;
+}
+.fragmentKind {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--ink);
+}
+.fragmentGuard {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-style: italic;
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: var(--ground);
+  stroke-width: 4px;
+}
+.fragmentSplit {
+  stroke: var(--ink);
+  stroke-width: 1.25;
+  stroke-dasharray: 6 4;
+}

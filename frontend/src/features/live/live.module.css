@@ -1,0 +1,102 @@
+/* Two quiet lines, no box: the status with the reading time, then when the next reading comes. */
+.panel {
+  display: grid;
+  gap: var(--s-1);
+  min-width: 0;
+  color: var(--ink);
+}
+
+/* The note behind the "i" hangs from the start of the line, so it fits even a 320 px screen. */
+.status > span:has(> [role="tooltip"]) {
+  position: static;
+}
+.status [role="tooltip"] {
+  left: 0;
+  transform: none;
+}
+.status {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1) var(--s-2);
+  margin: 0;
+}
+.pulse {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--tomato);
+  animation: pulse 2s var(--ease) infinite;
+}
+.pulse[data-pulse="snapshot"] {
+  background: var(--stone);
+  border: 2px solid var(--ink-2);
+  animation: none;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+}
+/* Reduced motion: a still dot, outlined so it reads as a status light rather than a stray mark. */
+:root:global(.reduce-motion) .pulse {
+  animation: none;
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+.label {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.local {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.local::before {
+  content: "· " / "";
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.next {
+  margin: 0;
+  padding-inline-start: calc(10px + var(--s-2)); /* lines up under the label, past the dot */
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The source and its licence: quiet, but always on screen while the weather is. */
+.credit {
+  margin: 0;
+  padding-inline-start: calc(10px + var(--s-2));
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.credit a {
+  color: inherit;
+  text-underline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .pulse {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+}

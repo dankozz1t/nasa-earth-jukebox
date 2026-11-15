@@ -1,0 +1,175 @@
+/* The view for scientists: short sections, tables and numbered pipelines. Easier to read than the
+   engineering view, with the same flat boxes and ink. */
+
+.science {
+  margin-block-start: var(--s-5);
+  line-height: 1.55;
+}
+.science code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding-inline: 0.2em;
+  background: var(--stone);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.intro {
+  margin: 0;
+  max-width: 68ch;
+  font-size: 1.0625rem;
+}
+
+/* ---------- contents ---------- */
+.toc {
+  margin-block-start: var(--s-5);
+  padding: var(--s-4);
+  border: var(--border);
+  background: var(--paper);
+}
+.tocTitle {
+  margin: 0 0 var(--s-2);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.toc ol {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  display: grid;
+  gap: var(--s-1);
+}
+.toc a {
+  display: inline-block;
+  min-height: 32px;
+  padding-block: var(--s-1);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ---------- sections ---------- */
+.section {
+  margin-block-start: var(--s-6);
+  padding-block-start: var(--s-4);
+  border-block-start: var(--border);
+  display: grid;
+  gap: var(--s-4);
+  scroll-margin-block-start: var(--s-4);
+}
+.h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  line-height: 1.15;
+  overflow-wrap: break-word;
+}
+.h3 {
+  margin: var(--s-3) 0 0;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.p {
+  margin: 0;
+  max-width: 72ch;
+}
+.list {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  display: grid;
+  gap: var(--s-2);
+  max-width: 80ch;
+}
+
+.caption {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+/* ---------- pipelines ---------- */
+.flowFigure {
+  margin: 0;
+  display: grid;
+  gap: var(--s-2);
+}
+.flow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--s-2);
+}
+.step {
+  display: grid;
+  align-content: start;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border: var(--border);
+  background: var(--paper);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+.num {
+  justify-self: start;
+  display: grid;
+  place-items: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding-inline: var(--s-1);
+  background: var(--ink);
+  color: var(--ground);
+  font-family: var(--font-display);
+  font-weight: 900;
+}
+
+/* ---------- tables ---------- */
+.tableWrap {
+  overflow-x: auto;
+  max-width: 100%;
+  border: var(--border);
+  background: var(--paper);
+}
+.tableWrap:focus-visible {
+  outline-offset: 2px;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+/* Three or more columns of sentences scroll sideways on a phone instead of crushing to one word a line. */
+.table[data-cols="3"] {
+  min-width: 600px;
+}
+.table[data-cols="5"],
+.table[data-cols="6"] {
+  min-width: 520px;
+}
+.table .caption {
+  caption-side: top;
+  padding: var(--s-2) var(--s-3);
+  text-align: start;
+  border-block-end: var(--border);
+}
+.table th,
+.table td {
+  padding: var(--s-2) var(--s-3);
+  border-block-end: 1px solid var(--ink-2);
+  text-align: start;
+  vertical-align: top;
+}
+.table thead th {
+  background: var(--ink);
+  color: var(--ground);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+.table tbody th {
+  font-weight: 700;
+}
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-block-end: 0;
+}

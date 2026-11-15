@@ -1,0 +1,333 @@
+.stack {
+  display: grid;
+  gap: var(--s-5);
+}
+.group {
+  display: grid;
+  gap: var(--s-3);
+  min-width: 0;
+}
+.heading {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.status {
+  min-height: 1.5em;
+  margin: 0 0 var(--s-3);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+.error {
+  margin: 0;
+  padding: var(--s-2) var(--s-3);
+  border: var(--border);
+  background: var(--tomato);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.wave {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: var(--border);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--s-2);
+}
+.tile {
+  position: relative;
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: var(--s-1);
+  min-height: var(--target);
+  padding: var(--s-3);
+  border: var(--border);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: start;
+  transition: background-color var(--dur) var(--ease);
+}
+.tile[aria-checked="true"] {
+  background: var(--ink);
+  color: var(--ground);
+}
+.tile[data-disabled="true"] {
+  cursor: not-allowed;
+  background: var(--ground);
+  color: var(--ink-2);
+  border-style: dashed;
+}
+.tile[data-disabled="true"][aria-checked="true"] {
+  background: var(--ground);
+  color: var(--ink-2);
+}
+.tileMark {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+}
+.plate svg {
+  background: var(--paper);
+  border: 1px solid var(--ink);
+}
+.tileLabel {
+  font-weight: 700;
+}
+.tileDesc {
+  font-size: 0.875rem;
+}
+.tile:not([aria-checked="true"]) .tileDesc {
+  color: var(--ink-2);
+}
+.tileBadge {
+  display: inline-block;
+  margin-inline-end: var(--s-2);
+  padding: 0 var(--s-1);
+  border: var(--border);
+  background: var(--sun);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.tabsWrap {
+  display: grid;
+  gap: var(--s-4);
+}
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 80px), 1fr));
+  gap: var(--s-1);
+}
+.tab {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: var(--s-1);
+  min-height: calc(var(--target) * 1.4);
+  padding: var(--s-2) var(--s-1);
+  border: var(--border);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  transition: background-color var(--dur) var(--ease);
+}
+.tab[aria-selected="true"] {
+  background: var(--ink);
+  color: var(--ground);
+}
+.panel {
+  min-width: 0;
+}
+.panel[hidden] {
+  display: none;
+}
+
+.ears {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+}
+.sens {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+}
+
+/* One card per voice: its swatch (as on the player bar), its switch, Solo, and its own activity lane. */
+.parts {
+  display: grid;
+  gap: var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.part {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+  padding: var(--s-3);
+  border: var(--border);
+  background: var(--paper);
+}
+.part[data-off="true"] {
+  border-style: dashed;
+  background: var(--ground);
+}
+.partHead {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-2);
+}
+/* The switch sits inside the card, so it drops its own frame and keeps only the track. */
+.partToggle {
+  min-width: 0;
+}
+.partToggle > [role="switch"] {
+  min-width: 0;
+  padding: var(--s-1) 0;
+  border: 0;
+  background: none;
+  overflow-wrap: anywhere;
+}
+.partHead > button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--ground);
+}
+.swatch {
+  flex: none;
+  display: block;
+  border: 1px solid var(--ink);
+}
+.partLane {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-2);
+}
+.partKind {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  color: var(--ink-2);
+}
+.laneBox {
+  min-width: 0;
+  padding: var(--s-1);
+  background: var(--ground);
+  border: 1px solid var(--stone);
+}
+.part[data-off="true"] .laneBox {
+  background: var(--paper);
+  border-style: dashed;
+}
+.laneTrack {
+  position: relative;
+}
+.lane {
+  display: block;
+  width: 100%;
+  height: 28px;
+}
+.playhead {
+  position: absolute;
+  inset-block: -2px;
+  width: 2px;
+  margin-inline-start: -1px;
+  background: var(--ink);
+  pointer-events: none;
+}
+.key {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 var(--s-1);
+  border: 1px solid var(--stone);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.partAbout {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+.chord {
+  min-height: 1.5em;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.fact {
+  margin: 0;
+  font-weight: 700;
+}
+.notes {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding-inline-start: var(--s-4);
+  font-size: 0.875rem;
+}
+
+.headRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  min-width: 0;
+}
+/* Anchored to the row's end and capped to the panel, so the tip is never cut by the scroll box. */
+.headRow [role="tooltip"] {
+  left: auto;
+  right: 0;
+  max-width: min(18rem, calc(100vw - 2 * var(--s-5)));
+  transform: none;
+}
+
+/* The stereo picture with a headphone cup on each side, so "left" and "right" mean the ears. */
+.earsBox {
+  display: grid;
+  gap: var(--s-1);
+  max-width: 320px;
+}
+.earRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.earRow > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+.earsBox[data-stereo="true"] .earRow > span:first-child > svg {
+  color: var(--cobalt);
+}
+.earsBox[data-stereo="true"] .earRow > span:last-child > svg {
+  color: var(--tomato);
+}
+.earsBox[data-stereo="false"] .earRow {
+  justify-content: center;
+  color: var(--ink-2);
+}

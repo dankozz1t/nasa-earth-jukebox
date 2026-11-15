@@ -1,0 +1,389 @@
+.shelf {
+  display: grid;
+  gap: var(--s-5);
+}
+.row {
+  min-width: 0;
+}
+.rowTitle {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-block-end: var(--s-3);
+}
+/* Every sleeve is the same size in both rows, whatever their count. A row longer than the screen scrolls. */
+.rail {
+  --sleeve: 112px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--sleeve);
+  justify-content: start;
+  gap: var(--s-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: var(--s-5) var(--s-2) var(--s-3);
+  scroll-padding-inline: var(--s-2);
+  /* A row longer than the screen scrolls; a thin quiet bar reads as a rail, not as a broken layout. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-2) transparent;
+}
+.slot {
+  position: relative;
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+.sleeve {
+  position: relative;
+  z-index: 1; /* in front of the record that slides out behind it */
+  display: grid;
+  gap: var(--s-1);
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: start;
+  transition: transform var(--dur) var(--ease);
+}
+/* The record inside the sleeve: hidden behind the cover, its edge slides out above it while it plays. */
+.slot::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset-block-start: 0;
+  inset-inline-start: 14%;
+  width: 72%;
+  aspect-ratio: 1;
+  border: var(--border);
+  border-radius: 50%;
+  background: var(--print-ink);
+  pointer-events: none;
+  transition: transform 200ms var(--ease);
+}
+.slot[data-playing="true"]::before {
+  transform: translateY(-16px);
+}
+/* A dimmed sleeve would show the record through. */
+.slot[data-disabled="true"]::before {
+  display: none;
+}
+.sleeve:hover {
+  transform: translateY(-4px);
+}
+.sleeve[aria-busy="true"]:hover {
+  transform: none;
+}
+.slot[data-selected="true"] .cover {
+  outline: 4px solid var(--ink);
+  outline-offset: 3px;
+}
+.slot[data-disabled="true"] .sleeve {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.slot[data-disabled="true"] .sleeve:hover {
+  transform: none;
+}
+
+.slot[data-custom="true"] .cover {
+  border-style: dashed;
+}
+.cover {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  border: var(--border);
+  overflow: hidden;
+}
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  margin-block-start: var(--s-2);
+}
+/* The instruments: still part of the sleeve's name for screen readers everywhere. Seen as a strip over
+   the cover on hover or focus, and as a line under the title only on very large screens. */
+.sub {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--s-1);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+.sub > span {
+  width: 100%;
+  padding: 2px var(--s-1);
+  border: var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.3;
+}
+.sleeve:hover .sub,
+.sleeve:focus-visible .sub {
+  opacity: 1;
+}
+.slot[data-busy="true"] .sub {
+  opacity: 0;
+}
+/* Why a sleeve cannot play sits on its cover, so every sleeve keeps the same height. */
+.reason {
+  position: absolute;
+  z-index: 3;
+  inset-inline: 0;
+  inset-block-start: 0;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: flex-end;
+  margin: 0;
+  padding: var(--s-1);
+  pointer-events: none;
+}
+.reason > span {
+  width: 100%;
+  padding: 2px var(--s-1);
+  border: var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.6875rem;
+  line-height: 1.25;
+}
+.note {
+  display: block;
+  margin-block-start: var(--s-1);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+
+.badge,
+.badgeLive,
+.badgeAi {
+  position: absolute;
+  inset-block-start: var(--s-2);
+  inset-inline-start: var(--s-2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: 2px var(--s-2);
+  border: var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.badgeAi {
+  inset-inline-start: auto;
+  inset-inline-end: var(--s-2);
+  background: var(--sun);
+  color: var(--on-accent);
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tomato);
+  border: 1px solid var(--ink);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.eq {
+  position: absolute;
+  inset-block-end: var(--s-2);
+  inset-inline-end: var(--s-2);
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 20px;
+  padding: 3px;
+  background: var(--paper);
+  border: var(--border);
+}
+.eq i {
+  width: 3px;
+  height: 100%;
+  background: var(--ink);
+  transform-origin: bottom;
+  animation: eq 0.8s var(--ease) infinite alternate;
+}
+.eq i:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.eq i:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes eq {
+  from {
+    transform: scaleY(0.3);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* Laid exactly over the cover. Size containment keeps the content from stretching it, and the ring and
+   label scale with the cover, so they stay centred on every sleeve size. */
+.progress {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  aspect-ratio: 1;
+  container-type: size;
+  overflow: hidden;
+  border: var(--border);
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+.progressInner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6%;
+}
+.ring {
+  display: block;
+  width: 44%;
+  max-width: 64px;
+  height: auto;
+  aspect-ratio: 1;
+}
+.progressText {
+  max-width: 92%;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+/* A small cover keeps the ring and the percent; the word is in the progressbar's name. */
+@container (max-width: 119px) {
+  .progressWord {
+    display: none;
+  }
+}
+.spin {
+  transform-box: view-box;
+  transform-origin: 24px 24px;
+  animation: spin 1.2s linear infinite;
+}
+.arc {
+  transition: stroke-dashoffset 240ms linear;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+:root:global(.reduce-motion) .sleeve:hover {
+  transform: none;
+}
+:root:global(.reduce-motion) .dot,
+:root:global(.reduce-motion) .eq i,
+:root:global(.reduce-motion) .spin {
+  animation: none;
+}
+
+@media (min-width: 1024px) {
+  .rail {
+    --sleeve: 120px;
+    gap: var(--s-3);
+    /* Room for the record that slides 16 px out of the playing sleeve, clear of the "Side" heading. */
+    padding-block-start: calc(var(--s-5) + var(--s-1));
+  }
+  .rowTitle {
+    margin-block-end: var(--s-1);
+  }
+  .title {
+    font-size: 0.875rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  /* Narrow covers: the AI mark moves to the lower corner, clear of the LIVE badge. */
+  .badgeAi {
+    inset-block-start: auto;
+    inset-inline-end: auto;
+    inset-block-end: var(--s-2);
+    inset-inline-start: var(--s-2);
+  }
+}
+
+/* Touch has no hover or focus ring to reveal the strip, so the instruments sit under the title in small
+   type, held to one line so the sleeves stay the same height. */
+@media (hover: none) {
+  .sub {
+    position: static;
+    aspect-ratio: auto;
+    display: block;
+    padding: 0;
+    opacity: 1;
+    font-size: 0.6875rem;
+    line-height: 1.3;
+  }
+  .sub > span {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-2);
+    font-family: var(--font-text);
+    font-size: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .slot[data-busy="true"] .sub {
+    opacity: 1;
+  }
+}
+
+/* Very large screens: room for the instruments under every title, larger type. */
+@media (min-width: 1600px) {
+  .sub {
+    position: static;
+    aspect-ratio: auto;
+    display: block;
+    padding: 0;
+    opacity: 1;
+  }
+  .sub {
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+  .sub > span {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-2);
+    font-family: var(--font-text);
+    font-size: inherit;
+  }
+  .slot[data-busy="true"] .sub {
+    opacity: 1;
+  }
+  .rail {
+    --sleeve: 136px;
+  }
+}

@@ -1,0 +1,24 @@
+.toggle {
+  display: inline-grid;
+  place-items: center;
+  width: var(--target);
+  height: var(--target);
+  padding: 0;
+  border: var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  transition:
+    background-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.toggle:hover {
+  background: var(--sun);
+  color: var(--on-accent);
+}
+/* No reduce-motion override needed: --dur is 0 there. */
+.toggle > svg {
+  transition: transform var(--dur) var(--ease);
+}
+.toggle[aria-pressed="true"] > svg {
+  transform: rotate(90deg);
+}

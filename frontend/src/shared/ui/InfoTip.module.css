@@ -1,0 +1,59 @@
+.root {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.button {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: help;
+}
+
+/* The visible dot stays small; the invisible hit area reaches the 44 px target. */
+.button::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+}
+
+.button:hover,
+.button[aria-expanded="true"] {
+  color: var(--ink);
+}
+
+.tip {
+  position: absolute;
+  left: 50%;
+  z-index: 40;
+  width: max-content;
+  max-width: min(18rem, 80vw);
+  padding: var(--s-2) var(--s-3);
+  border: var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 0.875rem/1.4 var(--font-text);
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  transform: translateX(-50%);
+}
+
+.tip[data-side="top"] {
+  bottom: calc(100% + 8px);
+}
+
+.tip[data-side="bottom"] {
+  top: calc(100% + 8px);
+}
+
+.tip[hidden] {
+  display: none;
+}

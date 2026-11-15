@@ -1,0 +1,472 @@
+.bar {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 40; /* above the page, under dialogs (top layer) */
+  border-block-start: var(--border);
+  background: var(--ground);
+  color: var(--ink);
+}
+.bar:focus-visible {
+  outline-offset: -5px;
+}
+
+/* Five groups: transport | title over progress | waves | instruments and volume | Sound settings and Save.
+   Every button in the bar is an icon; its name shows as a tooltip on hover or keyboard focus. */
+.inner {
+  display: grid;
+  align-items: center;
+  gap: var(--s-1) var(--s-2);
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: var(--s-2) var(--s-3) calc(var(--s-2) + env(safe-area-inset-bottom, 0px));
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "deck  title title  title"
+    "seek  seek  seek   seek"
+    "waves .     toggle actions";
+}
+
+.deck {
+  grid-area: deck;
+  display: flex;
+  align-items: center;
+}
+.sleeve {
+  display: none;
+  flex: none;
+  border: var(--border);
+  background: var(--print-ink);
+  overflow: hidden;
+}
+.sleeve > svg {
+  display: block;
+}
+
+.disc {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: var(--border);
+  border-radius: 50%;
+  background: var(--print-ink);
+  color: var(--print-paper);
+  transition: transform var(--dur) var(--ease);
+}
+.disc:focus-visible {
+  border-radius: 50%;
+}
+.grooves {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.disc[aria-pressed="true"] .grooves {
+  animation: turn 3.6s linear infinite;
+}
+.label {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 62%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--tomato);
+  color: var(--on-accent);
+}
+.discCaption {
+  display: none;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  fill: currentColor;
+}
+@keyframes turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+:root:global(.reduce-motion) .disc[aria-pressed="true"] .grooves {
+  animation: none;
+}
+.title {
+  grid-area: title;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+}
+.state {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.state[data-busy="true"] {
+  color: var(--ink);
+}
+.nameLine {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: 0 var(--s-1);
+  border: var(--border);
+  background: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+@media (max-width: 479px) {
+  .badge {
+    display: none;
+  }
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tomato);
+  border: 1px solid var(--ink);
+}
+
+.seek {
+  grid-area: seek;
+  min-width: 0;
+}
+.wavesSlot {
+  grid-area: waves;
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+/* The instruments note spans its whole heading row, so it fits a phone wherever the "i" lands. */
+.mixHead {
+  position: relative;
+}
+.mixHead > span:has(> [role="tooltip"]) {
+  position: static;
+  flex: none;
+}
+.mixHead [role="tooltip"] {
+  left: 0;
+  transform: none;
+}
+.waves {
+  display: block;
+  width: 72px;
+  height: 28px;
+  color: var(--ink);
+}
+
+/* One look for every icon button in the bar: a quiet square that shows its edge on hover. */
+.stop,
+.toolsToggle,
+.actions [aria-haspopup] {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--target);
+  min-width: var(--target);
+  height: var(--target);
+  min-height: var(--target);
+  padding: 0;
+  gap: 0;
+  border: 2px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0; /* Tune and Save keep their words as the accessible name, only the icon shows */
+  transform: none;
+  transition:
+    border-color var(--dur) var(--ease),
+    background-color var(--dur) var(--ease);
+}
+.stop > svg,
+.toolsToggle > svg,
+.actions [aria-haspopup] > svg {
+  width: 22px;
+  height: 22px;
+}
+.stop:hover:not(:disabled),
+.toolsToggle:hover,
+.actions [aria-haspopup]:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: var(--paper);
+  transform: none;
+}
+.toolsToggle[aria-expanded="true"],
+.actions [aria-haspopup][aria-expanded="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ground);
+}
+.stop:disabled,
+.actions [aria-haspopup]:disabled {
+  background: transparent;
+  color: var(--ink-2);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.toolsText {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Tooltips: the name of an icon button, above it. */
+.tipped {
+  position: relative;
+  display: inline-flex;
+}
+.tipText {
+  position: absolute;
+  inset-block-end: calc(100% + 6px);
+  left: 50%;
+  z-index: 2;
+  display: none;
+  padding: 3px var(--s-2);
+  background: var(--ink);
+  color: var(--ground);
+  font-family: var(--font-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+.tipped[data-align="end"] .tipText {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+@media (hover: hover) {
+  .tipped:hover .tipText {
+    display: block;
+  }
+}
+.tipped:has(:focus-visible) .tipText {
+  display: block;
+}
+/* An open menu or panel speaks for itself. The Sound settings drawer is a child of its button's wrapper,
+   so hover and focus inside the open drawer would otherwise show the name behind the backdrop. */
+.tipped:has([aria-expanded="true"]) .tipText,
+.tipped:has(dialog[open]) .tipText {
+  display: none;
+}
+
+.toolsTip {
+  grid-area: toggle;
+}
+.stopTip {
+  margin-inline-start: var(--s-2);
+}
+
+/* Instruments: volume and the mix chips. Below 1024 px both live in the panel the toggle opens. */
+.tools {
+  display: none;
+}
+.tools[data-open] {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 100%;
+  display: grid;
+  gap: var(--s-4);
+  max-height: 60dvh;
+  overflow-y: auto;
+  padding: var(--s-4);
+  border-block-start: var(--border);
+  background: var(--ground);
+}
+.volume {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.volume > :nth-child(2) {
+  flex: 1;
+}
+/* The panel scrolls, so its notes open downwards inside it instead of being cut off at its top. */
+.tools[data-open] [role="tooltip"] {
+  inset-block-start: calc(100% + 8px);
+  inset-block-end: auto;
+}
+.mix {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.mixHead {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+
+.actions {
+  grid-area: actions;
+  display: flex;
+  gap: var(--s-1);
+  justify-content: flex-end;
+}
+/* The bar sits at the bottom: the Save list opens upward and keeps to the right edge. */
+.actions [role="menu"] {
+  inset-block-start: auto;
+  inset-block-end: 100%;
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  margin: 0 0 var(--s-1);
+}
+
+@media (min-width: 480px) {
+  .inner {
+    padding-inline: var(--s-4);
+    grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+    grid-template-areas:
+      "deck title title toggle actions"
+      "deck seek  seek  seek   waves";
+  }
+  .sleeve {
+    display: block;
+    width: 48px;
+    height: 48px;
+  }
+  .disc {
+    margin-inline-start: -16px;
+  }
+  .disc[aria-pressed="true"] {
+    transform: translateX(6px);
+  }
+  .wavesSlot {
+    justify-content: flex-end;
+  }
+}
+
+/* From 768 px: one row. The title sits over its progress, the other groups beside them. */
+@media (min-width: 768px) {
+  .inner {
+    gap: var(--s-1) var(--s-3);
+    padding-inline: var(--s-6);
+    grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+    grid-template-areas:
+      "deck title waves toggle actions"
+      "deck seek  waves toggle actions";
+  }
+  .sleeve {
+    width: 60px;
+    height: 60px;
+  }
+  .disc {
+    width: 68px;
+    height: 68px;
+    margin-inline-start: -22px;
+  }
+  .discCaption {
+    display: inline;
+  }
+  .name {
+    font-size: 1rem;
+  }
+  .waves {
+    width: 96px;
+    height: 32px;
+  }
+  .wavesSlot {
+    padding-inline: var(--s-2);
+    border-inline: 1px solid var(--stone);
+  }
+}
+
+/* From 1024 px the volume stays in the bar, and the toggle opens only the chips, as a card above it. */
+@media (min-width: 1024px) {
+  .inner {
+    position: relative;
+    gap: var(--s-1) var(--s-4);
+    grid-template-columns: auto minmax(0, 1fr) auto auto minmax(140px, 200px) auto;
+    grid-template-areas:
+      "deck title waves toggle volume actions"
+      "deck seek  waves toggle volume actions";
+  }
+  .waves {
+    width: 112px;
+    height: 36px;
+  }
+  .tools,
+  .tools[data-open] {
+    display: contents;
+  }
+  .volume {
+    grid-area: volume;
+  }
+  .tools[data-open] [role="tooltip"] {
+    inset-block-start: auto;
+    inset-block-end: calc(100% + 8px);
+  }
+  .mix {
+    display: none;
+  }
+  .tools[data-open] .mix {
+    position: absolute;
+    inset-block-end: calc(100% + 2px);
+    inset-inline-end: var(--s-6);
+    z-index: 1;
+    display: grid;
+    gap: var(--s-3);
+    width: max-content;
+    max-width: min(44rem, calc(100% - 2 * var(--s-6)));
+    padding: var(--s-4);
+    border: var(--border);
+    background: var(--ground);
+  }
+}
+
+/* Very large screens: the title column and the volume grow with the type. */
+@media (min-width: 1600px) {
+  .inner {
+    grid-template-columns: auto minmax(0, 1fr) auto auto minmax(160px, 15rem) auto;
+  }
+  .waves {
+    width: 128px;
+  }
+}

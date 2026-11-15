@@ -1,0 +1,26 @@
+.group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  border: var(--border);
+  background: var(--paper);
+}
+.option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: var(--target);
+  min-width: var(--target);
+  padding: 0 var(--s-4);
+  border: 0;
+  border-inline-end: var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 700;
+}
+.option:last-child {
+  border-inline-end: 0;
+}
+.option[aria-checked="true"] {
+  background: var(--ink);
+  color: var(--ground);
+}

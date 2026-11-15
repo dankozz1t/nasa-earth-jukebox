@@ -1,0 +1,46 @@
+# docker compose up -d --build  ->  http://localhost:5180
+# Optional settings and API keys: copy .env.example to .env
+
+name: earth-jukebox
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5180}:80"
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    environment:
+      SoundService__BaseUrl: http://sound-service:8000/
+      RateLimit__AiComposePerHour: ${AI_PER_VISITOR_HOUR:-10}
+    ports:
+      # published for `npm run dev`, which proxies /api here
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      sound-service:
+        condition: service_healthy
+    restart: unless-stopped
+
+  sound-service:
+    build: ./sound-service
+    environment:
+      ES_LOG_LEVEL: ${ES_LOG_LEVEL:-INFO}
+      ES_CACHE_SIZE: ${ES_CACHE_SIZE:-8}
+      # true = bundled weather snapshot, no internet needed
+      ES_WEATHER_OFFLINE: ${ES_WEATHER_OFFLINE:-false}
+      # Optional AI composer: without a key the rule-based composer plays
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      ES_AI_PROVIDER: ${ES_AI_PROVIDER:-auto}
+      ES_AI_MODEL: ${ES_AI_MODEL:-}
+      ES_AI_EFFORT: ${ES_AI_EFFORT:-low}
+      ES_AI_DAILY_LIMIT: ${ES_AI_DAILY_LIMIT:-100}
+    # no published ports: only the backend reaches it
+    read_only: true
+    tmpfs: ["/tmp:size=64m"]
+    restart: unless-stopped

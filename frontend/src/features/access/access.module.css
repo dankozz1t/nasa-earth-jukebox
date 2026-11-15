@@ -1,0 +1,213 @@
+.buttonText {
+  display: none;
+}
+@media (min-width: 768px) {
+  .buttonText {
+    display: inline;
+  }
+}
+
+/* First level: four situations as big toggles. Two per row once the panel has the room. */
+.profiles {
+  container-type: inline-size;
+  margin-block-end: var(--s-4);
+}
+.profiles > h3 {
+  font-size: 1.125rem;
+}
+.profiles > .note {
+  margin: var(--s-1) 0 var(--s-3);
+}
+.cards {
+  display: grid;
+  gap: var(--s-2);
+}
+@container (min-width: 300px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.card {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  align-content: start;
+  gap: var(--s-1);
+  min-height: 112px;
+  padding: var(--s-3);
+  border: var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: start;
+  transition: background-color var(--dur) var(--ease);
+}
+.card:hover {
+  background: var(--stone);
+}
+.card[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--ground);
+}
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+/* An empty box while off, a tick in a filled box while on: the state reads without colour. */
+.cardMark {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: var(--border);
+  border-color: currentColor;
+}
+.card[aria-pressed="true"] .cardMark {
+  background: var(--ground);
+  color: var(--ink);
+  border-color: var(--ground);
+}
+.cardName {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  margin-block-start: var(--s-1);
+}
+.cardItems {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+.cardNote {
+  display: block;
+  margin-block-start: var(--s-1);
+  font-size: 0.75rem;
+}
+
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.quick > * {
+  flex: 1 1 auto;
+}
+.quick + .note {
+  margin-block: var(--s-2) 0;
+}
+/* Never display:none — a live region has to be in the tree before its text arrives, or the first
+   announcement is dropped. Empty, it just takes no room. */
+.quick + .note:empty {
+  margin: 0;
+  padding: 0;
+}
+
+/* Second level: everything one by one, closed until asked for. */
+.disclosure {
+  margin-block-start: var(--s-4);
+  border-block-start: var(--border);
+}
+.disclosureHeading {
+  font-size: 1rem;
+}
+.disclosureButton {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  min-height: var(--target);
+  padding: var(--s-3) 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  text-align: start;
+}
+.disclosureButton > span:first-of-type {
+  flex: 1;
+}
+.chevron {
+  display: grid;
+  transition: transform var(--dur) var(--ease);
+}
+.disclosureButton[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+.disclosureBody {
+  padding-block: var(--s-2) var(--s-3);
+}
+
+.group {
+  margin-block-end: var(--s-5);
+}
+.group > h4 {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-3);
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 800;
+}
+.items {
+  display: grid;
+  gap: var(--s-2);
+}
+.note {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+.group > .note {
+  margin-block-end: var(--s-2);
+}
+.footer {
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+  margin-block-start: var(--s-4);
+  padding-block-start: var(--s-4);
+  border-top: var(--border);
+}
+.rowLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-weight: 700;
+}
+.sliderRow {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-3);
+}
+.sliderRow > :last-child {
+  flex: 1;
+}
+.works {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  font-size: 0.875rem;
+}
+.works dt {
+  font-weight: 700;
+}
+.works dd {
+  margin: 0 0 var(--s-2);
+  color: var(--ink);
+}
+.links {
+  display: grid;
+  gap: var(--s-1);
+  margin: var(--s-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.links a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  min-height: var(--target);
+  color: var(--ink);
+  font-weight: 700;
+}

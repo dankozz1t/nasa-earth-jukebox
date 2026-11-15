@@ -1,0 +1,137 @@
+.home {
+  display: grid;
+  gap: var(--s-4);
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: 0 var(--s-4) var(--s-5);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "picker" "live" "stage" "now" "captions";
+}
+
+.picker {
+  grid-area: picker;
+  display: grid;
+  gap: var(--s-3);
+  min-width: 0;
+  justify-items: start;
+}
+.picker > * {
+  max-width: 100%;
+}
+.live {
+  grid-area: live;
+  min-width: 0;
+}
+.stage {
+  grid-area: stage;
+  min-width: 0;
+}
+.now {
+  grid-area: now;
+  min-width: 0;
+}
+.captions {
+  grid-area: captions;
+  min-width: 0;
+}
+
+/* The shelf shows one row, for the chosen source. Below 1024 px the source switch right above already
+   names it, so its "Side" label is left to screen readers. */
+.shelf {
+  min-width: 0;
+  justify-self: stretch;
+}
+.shelf[data-source="nasa"] [data-side="A"] h2,
+.shelf[data-source="live"] [data-side="B"] h2 {
+  text-decoration: underline 3px;
+  text-underline-offset: 6px;
+}
+
+@media (max-width: 1023px) {
+  .shelf [data-side] h2 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .picker {
+    gap: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .home {
+    gap: var(--s-5);
+    padding: 0 var(--s-6) var(--s-6);
+  }
+}
+
+/* Medium screens: the map comes right after the shelf, the live proof and the words share a row under it. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .home {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "picker picker"
+      "stage stage"
+      "live now"
+      "live captions";
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: var(--s-4);
+  }
+  .home:not(:has(.live)) {
+    grid-template-areas:
+      "picker picker"
+      "stage stage"
+      "now now"
+      "captions captions";
+  }
+}
+
+/* The stage column is capped by the window height (the map is 2:1), so map and player bar fit one screen;
+   the side column takes what is left. The cap has a floor: on a short window or at a high zoom the map
+   stays 560 px wide (280 px tall) and the page scrolls, instead of shrinking to a strip. 560 px, the gap
+   and the 320 px side column are 896 px, and the page is 944 px wide from 1024 px, so they always fit; below
+   1024 px the one-column layouts above already put the side blocks under the map. */
+@media (min-width: 1024px) {
+  .home {
+    --above: 402px;
+    grid-template-columns:
+      minmax(min(100%, 560px), max(560px, calc((100dvh - var(--player-h) - var(--above)) * 2)))
+      minmax(320px, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas:
+      "picker picker"
+      "stage live"
+      "stage now"
+      "stage captions";
+    row-gap: var(--s-4);
+  }
+}
+
+/* The source switch stands beside the shelf, so the stage fits above the fold at 1440 × 900. */
+@media (min-width: 1280px) {
+  .picker {
+    grid-template-columns: 220px minmax(0, 1fr);
+    align-items: start;
+    gap: var(--s-5);
+    justify-items: stretch;
+  }
+  .switch {
+    margin-block-start: calc(0.875rem * 1.15 + var(--s-1) + var(--s-5) + var(--s-1));
+  }
+}
+
+/* Very large screens: a wider page, a wider side column, and type that grows with the window
+   (base.css), instead of a 1280 px column lost in the middle. */
+@media (min-width: 1600px) {
+  .home {
+    --above: calc(402px + 6rem);
+    column-gap: var(--s-6);
+    padding-inline: var(--s-6);
+  }
+  .picker {
+    grid-template-columns: clamp(220px, 13vw, 300px) minmax(0, 1fr);
+  }
+}

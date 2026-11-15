@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Earth Jukebox: listen to the planet. Live weather around the globe, refreshed every 30 minutes, and a NASA aerosol map turn into music you can play, explore by keyboard and read as captions. Built for blind, low-vision, deaf and every other listener." />
+    <meta name="theme-color" content="#F4ECDF" />
+    <meta name="color-scheme" content="light" />
+    <title>Earth Jukebox</title>
+    <!-- The saved theme before the first paint, so a dark choice does not flash light. Light stays the default. -->
+    <script>
+      try {
+        var saved = JSON.parse(localStorage.getItem("earth-jukebox:prefs:v2") || "{}");
+        if (saved.state && saved.state.theme === "dark") document.documentElement.dataset.theme = "dark";
+      } catch (e) {}
+    </script>
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/logo-192.png" />
+    <link rel="apple-touch-icon" href="/logo-192.png" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

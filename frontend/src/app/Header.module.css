@@ -1,0 +1,178 @@
+.skips {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 20;
+}
+.skip:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skip:focus {
+  position: fixed;
+  inset-block-start: var(--s-2);
+  inset-inline-start: var(--s-2);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  padding: 0 var(--s-4);
+  border: var(--border);
+  background: var(--sun);
+  color: var(--on-accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: var(--s-3) var(--s-4);
+}
+.logo {
+  order: 0;
+  margin-inline-end: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: var(--target);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.125rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+}
+/* The team's logo, cropped to its record: a circle is the one round shape the system allows. */
+.mark {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: var(--border);
+  border-radius: 50%;
+  background: #f6ead8;
+}
+.nav {
+  order: 1;
+  display: flex;
+  gap: var(--s-2);
+}
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-width: var(--target);
+  min-height: var(--target);
+  color: var(--ink);
+  font-weight: 700;
+}
+.navLink[aria-current="page"] {
+  text-decoration: underline 3px;
+  text-underline-offset: 6px;
+}
+.navText {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.lang {
+  order: 2;
+}
+.lang [role="radio"] {
+  padding-inline: var(--s-3);
+}
+.theme {
+  order: 3;
+}
+.access {
+  order: 4;
+}
+
+/* Phones and tablets: the name and Accessibility on the first row, the rest on the second. */
+@media (max-width: 1023px) {
+  .header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "logo logo access"
+      "nav  lang theme";
+    padding-block: var(--s-2);
+  }
+  .logo {
+    grid-area: logo;
+  }
+  .access {
+    grid-area: access;
+  }
+  .nav {
+    grid-area: nav;
+  }
+  .lang {
+    grid-area: lang;
+    justify-self: end;
+  }
+  .theme {
+    grid-area: theme;
+  }
+}
+
+@media (min-width: 768px) {
+  .header {
+    gap: var(--s-4) var(--s-5);
+    padding: var(--s-4) var(--s-6);
+  }
+  .logo {
+    gap: var(--s-3);
+    font-size: 1.75rem;
+  }
+  .mark {
+    width: 44px;
+    height: 44px;
+  }
+  .nav {
+    gap: var(--s-5);
+  }
+  .navLink > svg {
+    display: none;
+  }
+  .navText {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+}
+
+@media (min-width: 1600px) {
+  .header {
+    padding-inline: var(--s-6);
+  }
+  .mark {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+@media (max-width: 359px) {
+  .logo {
+    font-size: 1rem;
+  }
+  .mark {
+    width: 28px;
+    height: 28px;
+  }
+}

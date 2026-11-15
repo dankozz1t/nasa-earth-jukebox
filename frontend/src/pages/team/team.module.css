@@ -1,0 +1,240 @@
+.page {
+  max-width: calc(62ch + 2 * var(--s-4));
+  margin-inline: auto;
+  padding: var(--s-4) var(--s-4) var(--s-6);
+}
+.h1 {
+  font-size: clamp(1.75rem, 8vw, 3rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  overflow-wrap: break-word;
+}
+.h1:focus-visible {
+  outline-offset: 4px;
+}
+.intro {
+  display: grid;
+  gap: var(--s-4);
+  justify-items: start;
+  margin-block: var(--s-4) var(--s-6);
+}
+.logo {
+  display: block;
+  width: clamp(144px, 46vw, 224px);
+  height: auto;
+  aspect-ratio: 1;
+  border: var(--border);
+}
+.story {
+  display: grid;
+  gap: var(--s-3);
+  min-width: 0;
+  max-width: 62ch;
+}
+.teamName {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  line-height: 1.15;
+}
+.challenge {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+.lead {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.section {
+  margin-block-end: var(--s-6);
+}
+.h2 {
+  margin: 0 0 var(--s-4);
+  font-size: 1.375rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+}
+.h3 {
+  margin: 0;
+  font-size: 1.0625rem;
+  overflow-wrap: anywhere;
+}
+
+.how {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-4);
+  grid-template-columns: minmax(0, 1fr);
+}
+.howItem {
+  display: grid;
+  gap: var(--s-2);
+  align-content: start;
+  padding: var(--s-4);
+  border: var(--border);
+  background: var(--stone);
+  color: var(--ink);
+}
+.howIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: var(--border);
+  background: var(--sun);
+  color: var(--on-accent);
+}
+.howText {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-4);
+  grid-template-columns: minmax(0, 1fr);
+}
+.card {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  border: var(--border);
+  background: var(--paper);
+  color: var(--ink);
+}
+.mark {
+  position: relative;
+  overflow: hidden;
+  border-inline-end: var(--border);
+  aspect-ratio: 1;
+  width: 100%;
+}
+.mark > svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.text {
+  display: grid;
+  gap: var(--s-2);
+  align-content: start;
+  padding: var(--s-3) var(--s-4);
+  min-width: 0;
+}
+.name {
+  margin: 0;
+  font-size: 1.125rem;
+  overflow-wrap: anywhere;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--s-3);
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--ink-2);
+}
+.handle {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.note {
+  margin: calc(-1 * var(--s-2)) 0 var(--s-4);
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  color: var(--ink-2);
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--s-3);
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: var(--target);
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.link svg {
+  flex: none;
+}
+.iconLink {
+  justify-content: center;
+  min-width: var(--target);
+  text-decoration: none;
+}
+.role {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+.does {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cta {
+  margin-block-start: var(--s-6);
+  text-decoration: none;
+}
+
+@media (min-width: 640px) {
+  .intro {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--s-5);
+  }
+  .logo {
+    width: clamp(176px, 26vw, 224px);
+  }
+  .how {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+  .mark {
+    border-inline-end: 0;
+    border-block-end: var(--border);
+  }
+}
+@media (min-width: 1024px) {
+  .page {
+    max-width: 1040px;
+  }
+  .lead {
+    font-size: 1.1875rem;
+  }
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1600px) {
+  .page {
+    max-width: 1240px;
+  }
+  .logo {
+    width: 256px;
+  }
+}

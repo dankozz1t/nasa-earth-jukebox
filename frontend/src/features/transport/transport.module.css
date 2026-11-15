@@ -1,0 +1,151 @@
+.bar {
+  display: grid;
+  gap: var(--s-4);
+  padding: var(--s-4);
+  border: var(--border);
+  background: var(--paper);
+}
+.sliders {
+  display: grid;
+  gap: var(--s-4);
+}
+@media (min-width: 768px) {
+  .sliders {
+    grid-template-columns: 2fr 1fr;
+    gap: var(--s-5);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.mix {
+  display: grid;
+  gap: var(--s-2);
+}
+.mixHint {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: var(--target);
+  min-height: var(--target);
+  padding: var(--s-1) var(--s-3);
+  border: var(--border);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background-color var(--dur) var(--ease);
+}
+.chip[aria-pressed="true"] {
+  background: var(--ground);
+}
+.chip[data-off="true"] {
+  background: var(--paper);
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.swatch {
+  flex: none;
+  border: 1px solid var(--ink);
+}
+.key {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+/* Fixed height: three lines (five on wide screens). Lines change inside without moving the page; extra lines
+   scroll inside the box. The gutter is kept so a scrollbar appearing does not rewrap the text. */
+.captions {
+  --cap-lines: 3;
+  height: calc(var(--cap-lines) * 1.45em + 2 * var(--s-3) + 4px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: var(--s-3) var(--s-4);
+  border: var(--border);
+  background: var(--ink);
+  color: var(--ground);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+.captions p,
+.captions ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.captions:focus-visible {
+  outline-offset: 2px;
+}
+
+.now {
+  min-height: calc(var(--target) * 1.25);
+}
+.nowText {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+/* Small and medium screens: nothing said yet takes no room, and the captions box is a slim strip. */
+@media (max-width: 1023px) {
+  .now:has(.nowText:empty) {
+    min-height: 0;
+  }
+  .nowText {
+    font-size: 1rem;
+  }
+  .captions {
+    height: calc(var(--cap-lines) * 1.45em + 2 * var(--s-2) + 4px);
+    padding: var(--s-2) var(--s-3);
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .bar {
+    gap: var(--s-3);
+    padding: var(--s-3);
+  }
+  .sliders {
+    grid-template-columns: 3fr 2fr;
+    gap: var(--s-3);
+  }
+  .mixHint {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .captions {
+    --cap-lines: 5;
+  }
+}
+
+/* Dark theme: an ink box would be the brightest thing on the page; the captions sit on paper instead. */
+:root:global([data-theme="dark"]) .captions {
+  background: var(--paper);
+  color: var(--ink);
+}

@@ -1,0 +1,70 @@
+.wrap {
+  position: relative;
+  display: inline-block;
+}
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: var(--target);
+  min-width: var(--target);
+  padding: 0 var(--s-4);
+  border: var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 700;
+}
+.trigger[aria-expanded="true"] {
+  background: var(--ink);
+  color: var(--ground);
+}
+.trigger:disabled {
+  background: var(--stone);
+  color: var(--ink-2);
+  cursor: not-allowed;
+}
+.menu {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  z-index: 10;
+  min-width: 100%;
+  margin-top: var(--s-1);
+  display: flex;
+  flex-direction: column;
+  border: var(--border);
+  background: var(--paper);
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: var(--target);
+  padding: 0 var(--s-4);
+  border: 0;
+  border-bottom: var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: start;
+  white-space: nowrap;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.item:last-child {
+  border-bottom: 0;
+}
+.item:hover {
+  background: var(--sun);
+  color: var(--on-accent);
+}
+/* Phones: the bar with the menu button sticks to the bottom edge, so the list opens upward. */
+@media (max-width: 767px) {
+  .menu {
+    inset-block-start: auto;
+    inset-block-end: 100%;
+    margin-top: 0;
+    margin-bottom: var(--s-1);
+  }
+}

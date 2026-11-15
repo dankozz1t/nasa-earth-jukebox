@@ -1,0 +1,51 @@
+{
+  "name": "earth-jukebox",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "description": "Earth Jukebox frontend: plays NASA aerosol and live weather soundscapes composed by the backend",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "format": "prettier --write src tests",
+    "format:check": "prettier --check src tests"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.10",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "axe-core": "^4.14.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "jsdom": "^31.0.1",
+    "prettier": "3.10.1",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.72.2",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "rollup": "npm:@rollup/wasm-node@^4.40.0"
+  },
+  "dependencies": {
+    "@fontsource-variable/golos-text": "^5.3.0",
+    "@fontsource-variable/unbounded": "^5.3.0",
+    "@fontsource/atkinson-hyperlegible-next": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@tanstack/react-query": "^5.107.1",
+    "lucide-react": "^1.73.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router": "^7.18.5",
+    "zustand": "^5.1.0"
+  }
+}

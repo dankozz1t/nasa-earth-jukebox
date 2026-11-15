@@ -1,0 +1,102 @@
+:root {
+  /* Cream, deep green and terracotta follow the team's logo. --cobalt keeps its name as the role
+     "accent 1" (links, the stage balance dot, diagrams); the sleeves print their own blue. */
+  --ground: #f4ecdf;
+  --ink: #111111;
+  --ink-2: #4a453d;
+  --stone: #e2d7c5;
+  --paper: #fffcf7;
+  --cobalt: #1f5a32;
+  --tomato: #d9573a;
+  --sun: #f2b705;
+
+  /* Text and marks on --tomato and --sun: dark in both themes (light text on them fails 4.5:1). */
+  --on-accent: #111111;
+  /* Printed colours of the record sleeves and the map box: they keep their look in both themes. */
+  --print-ink: #111111;
+  --print-paper: #ffffff;
+  --print-stone: #dcd8cf;
+  --print-cobalt: #2340d9;
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 40px;
+
+  --font-display: "Unbounded Variable", "Golos Text Variable", system-ui, sans-serif;
+  --font-text: "Golos Text Variable", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Frames and dividers. Ink in the light theme; the dark theme softens it. */
+  --line: var(--ink);
+  --border: 2px solid var(--line);
+  --target: 44px;
+  --text-scale: 1;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 160ms;
+  /* Height of the fixed player bar; the bar measures itself and updates it. */
+  --player-h: 128px;
+  /* Page width: 1280 px up to 1600 px windows, then most of the window (see the media rule below). */
+  --page-max: 1280px;
+
+  color-scheme: light;
+}
+
+/* Dark: a low-glare night version of the logo. The ground is charcoal tinted with the logo's green,
+   the ink is the logo's cream at about 87 %, the accents are a soft sage and the logo's terracotta,
+   and frames use a quieter line (still 3:1 on the ground, as a control's edge needs). */
+:root[data-theme="dark"] {
+  --ground: #191c19;
+  --ink: #d9cfbf;
+  --ink-2: #a6a093;
+  --stone: #343a34;
+  --paper: #222622;
+  --cobalt: #8dc09a;
+  --tomato: #c9786a;
+  --sun: #d9b04c;
+  --line: #767369;
+  /* The sleeves keep their print, on cream instead of glaring white. */
+  --print-paper: #ede5d6;
+
+  color-scheme: dark;
+}
+
+/* High contrast: accents stay on borders and large areas only. */
+:root.high-contrast {
+  --ground: #ffffff;
+  --ink: #000000;
+  --ink-2: #000000;
+  --stone: #ffffff;
+}
+
+:root[data-theme="dark"].high-contrast {
+  --ground: #000000;
+  --ink: #ffffff;
+  --ink-2: #ffffff;
+  --stone: #000000;
+  --paper: #000000;
+  --line: #ffffff;
+  --cobalt: #8fca9e;
+  --tomato: #d9573a;
+  --sun: #f2b705;
+  --print-paper: #ffffff;
+}
+
+/* Readable font: Latin glyphs from Atkinson, Cyrillic falls through to Golos Text. */
+:root.readable-font {
+  --font-text: "Atkinson Hyperlegible Next", "Golos Text Variable", system-ui, sans-serif;
+  --font-display: "Atkinson Hyperlegible Next", "Golos Text Variable", system-ui, sans-serif;
+}
+
+:root.reduce-motion {
+  --dur: 0ms;
+}
+
+/* Very large screens use the room: a wider page, capped so lines and the map do not stretch forever. */
+@media (min-width: 1600px) {
+  :root {
+    --page-max: min(92vw, 2200px);
+  }
+}

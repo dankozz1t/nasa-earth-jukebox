@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EarthJukebox.Api/EarthJukebox.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EarthJukebox.Api.Tests/EarthJukebox.Api.Tests.csproj" />
+  </Folder>
+</Solution>

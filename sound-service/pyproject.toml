@@ -1,0 +1,129 @@
+[project]
+name = "earth-sound"
+version = "0.2.0"
+description = "Earth Jukebox sound service: NASA aerosol frames and live weather in, score, audio stems and MIDI out"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi (>=0.115,<1.0)",
+    "uvicorn[standard] (>=0.30,<1.0)",
+    "pydantic (>=2.9,<3.0)",
+    "pydantic-settings (>=2.5,<3.0)",
+    "python-multipart (>=0.0.18)",
+    "numpy (>=2.1,<3.0)",
+    "pillow (>=11.0,<13.0)",
+    "mido (>=1.3,<2.0)",
+    "anthropic (>=2.0,<3.0)",
+    "httpx (>=0.27,<1.0)",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest (>=8.3)",
+    "httpx (>=0.27)",
+    "ruff (>=0.8)",
+    "mypy (>=1.13)",
+    "import-linter (>=2.1)",
+]
+
+[project.scripts]
+earth-sound = "earth_sound.__main__:main"
+
+[tool.poetry]
+packages = [{ include = "earth_sound", from = "src" }]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = ["--import-mode=importlib", "--strict-markers", "--strict-config"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RET", "C4", "PIE", "TID", "PT", "T20", "RUF"]
+ignore = ["B008", "RET504"]
+
+[tool.ruff.lint.per-file-ignores]
+# the AI prompt is prose: long lines read better than wrapped ones
+"src/earth_sound/adapters/outbound/ai/prompt.py" = ["E501"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.isort]
+known-first-party = ["earth_sound", "tests"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests"]
+plugins = ["pydantic.mypy"]
+mypy_path = "src"
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = ["mido", "mido.*"]
+ignore_missing_imports = true
+
+# layering: bootstrap -> adapters -> application -> domain -> shared
+[tool.importlinter]
+root_package = "earth_sound"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+id = "hexagon"
+name = "Hexagon: bootstrap -> adapters -> application -> domain -> shared"
+type = "layers"
+layers = [
+    "earth_sound.bootstrap",
+    "earth_sound.adapters",
+    "earth_sound.application",
+    "earth_sound.domain",
+    "earth_sound.shared",
+]
+
+[[tool.importlinter.contracts]]
+id = "pure-core"
+name = "Core (shared, domain, application) imports no web framework, image or MIDI library"
+type = "forbidden"
+source_modules = ["earth_sound.shared", "earth_sound.domain", "earth_sound.application"]
+forbidden_modules = ["fastapi", "starlette", "uvicorn", "pydantic", "pydantic_settings", "PIL", "mido", "anthropic", "urllib"]
+
+[[tool.importlinter.contracts]]
+id = "kernel-stdlib-only"
+name = "Shared kernel depends on the standard library only"
+type = "forbidden"
+source_modules = ["earth_sound.shared"]
+forbidden_modules = ["numpy"]
+
+[[tool.importlinter.contracts]]
+id = "adapter-sides"
+name = "Inbound (driving) and outbound (driven) adapters never import each other"
+type = "independence"
+modules = ["earth_sound.adapters.inbound", "earth_sound.adapters.outbound"]
+
+[[tool.importlinter.contracts]]
+id = "outbound-isolation"
+name = "Each outbound adapter is self-contained"
+type = "independence"
+modules = ["earth_sound.adapters.outbound.*"]
+
+[[tool.importlinter.contracts]]
+id = "domain-layers"
+name = "Domain: sound -> (music | weather) -> aerosols"
+type = "layers"
+containers = ["earth_sound.domain"]
+layers = ["sound", "music | weather", "aerosols"]
+
+[[tool.importlinter.contracts]]
+id = "application-layers"
+name = "Application: use-case slices -> ports -> models"
+type = "layers"
+containers = ["earth_sound.application"]
+layers = ["compose_soundscape | compose_weather | get_artifact", "ports", "models"]

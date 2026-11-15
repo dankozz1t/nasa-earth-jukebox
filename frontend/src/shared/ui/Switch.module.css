@@ -1,0 +1,50 @@
+.switch {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  min-height: var(--target);
+  padding: var(--s-2) var(--s-3);
+  border: var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: start;
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.label {
+  font-weight: 700;
+}
+.desc {
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+.track {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border: var(--border);
+  background: var(--stone);
+  flex: none;
+}
+.thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: var(--ink);
+  transition: transform var(--dur) var(--ease);
+}
+.switch[aria-checked="true"] .track {
+  background: var(--sun);
+}
+.switch[aria-checked="true"] .thumb {
+  background: var(--on-accent);
+}
+.switch[aria-checked="true"] .thumb {
+  transform: translateX(20px);
+}

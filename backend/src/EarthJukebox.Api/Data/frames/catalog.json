@@ -1,0 +1,11 @@
+[
+  {
+    "id": "svs-5669",
+    "title": "GEOS Aerosols, 19 Aug 2025, 20:00 UTC",
+    "source": "NASA Scientific Visualization Studio, ID 5669 (GEOS-FP 2 km Replay, NASA GMAO)",
+    "pageUrl": "https://svs.gsfc.nasa.gov/5669/",
+    "timestampUtc": "2025-08-19T20:00:00Z",
+    "image": "svs-5669/frame.png",
+    "colorbar": "svs-5669/colorbar.png"
+  }
+]

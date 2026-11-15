@@ -1,0 +1,15 @@
+# Local secrets: docker compose reads API keys from .env, never commit it.
+# Only the .env.example files are committed.
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors and local tool settings
+.claude/settings.local.json
+.vscode/
+.idea/
+*.log
